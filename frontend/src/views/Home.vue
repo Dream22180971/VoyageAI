@@ -24,8 +24,21 @@
           <svg v-if="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         </button>
-        <button class="btn btn-primary">开启探索</button>
+        <button class="btn btn-primary desktop-only">开启探索</button>
+        <button class="hamburger" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }">
+          <span></span><span></span><span></span>
+        </button>
       </div>
+      <transition name="menu">
+        <div class="mobile-menu" v-if="menuOpen" @click="menuOpen = false">
+          <router-link to="/" class="mobile-link">首页</router-link>
+          <router-link to="/inspiration" class="mobile-link">发现灵感</router-link>
+          <router-link to="/guide" class="mobile-link">目的地指南</router-link>
+          <router-link to="/community" class="mobile-link">社区足迹</router-link>
+          <router-link to="/about" class="mobile-link">关于我们</router-link>
+          <button class="btn btn-primary mobile-cta" @click="$router.push('/'); menuOpen = false">开启探索</button>
+        </div>
+      </transition>
     </nav>
 
     <!-- Hero Section -->
@@ -90,7 +103,7 @@
     <section class="features-section">
       <div class="features-grid">
         <router-link to="/inspiration" class="feature-card glass-card card-hover">
-          <div class="feature-icon bg-emerald-light">
+          <div class="feature-icon bg-purple-light">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
           </div>
           <h3 class="feature-title">灵感发现</h3>
@@ -98,7 +111,7 @@
           <span class="feature-btn-text">立即体验 →</span>
         </router-link>
         <router-link to="/guide" class="feature-card glass-card card-hover">
-          <div class="feature-icon bg-blue-light">
+          <div class="feature-icon bg-purple-light">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
           </div>
           <h3 class="feature-title">目的地指南</h3>
@@ -195,6 +208,7 @@ export default {
       loading: false,
       loadingProgress: 0,
       isDark: false,
+      menuOpen: false,
       errors: { start: '', dest: '', days: '', budget: '' }
     }
   },
@@ -382,7 +396,7 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
   background: var(--bg-card); border: 1px solid var(--border-color);
 }
 .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px var(--shadow-color); }
-.feature-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+.feature-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
 .feature-icon svg { width: 28px; height: 28px; color: white; }
 .bg-emerald-light { background: linear-gradient(135deg, var(--primary-color), #34D399); }
 .bg-blue-light { background: linear-gradient(135deg, var(--secondary-color), #60A5FA); }
@@ -430,6 +444,14 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
 
 @media (max-width: 768px) {
   .nav-links { display: none; }
+  .desktop-only { display: none; }
+  .hamburger { display: flex; }
+  .mobile-menu { display: flex; flex-direction: column; padding: 1rem 1.5rem; background: var(--bg-nav); backdrop-filter: blur(20px); border-top: 1px solid var(--border-color); }
+  .mobile-link { padding: 0.8rem 0; font-size: 1rem; font-weight: 500; color: var(--text-primary); text-decoration: none; border-bottom: 1px solid var(--border-color); }
+  .mobile-link:hover { color: var(--primary-color); }
+  .mobile-cta { margin-top: 1rem; width: 100%; justify-content: center; }
+  .menu-enter-active, .menu-leave-active { transition: all 0.3s ease; max-height: 400px; overflow: hidden; }
+  .menu-enter-from, .menu-leave-to { max-height: 0; opacity: 0; }
   .search-fields { flex-direction: column; gap: 1rem; }
   .field-divider { display: none; }
   .field-group { padding: 0; }
@@ -437,4 +459,10 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
   .footer-content { grid-template-columns: 1fr; gap: 2rem; }
   .footer-links { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
 }
+.hamburger { display: none; flex-direction: column; gap: 5px; padding: 0.5rem; cursor: pointer; background: none; border: none; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: all 0.3s; }
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+.mobile-menu { display: none; }
 </style>

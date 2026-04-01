@@ -3,8 +3,7 @@
     <nav class="nav-bar">
       <div class="nav-brand"><div class="brand-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/></svg></div><router-link to="/" class="brand-text-link"><span class="brand-text">Voyage<span class="brand-highlight">AI</span></span></router-link></div>
       <div class="nav-links"><router-link to="/" class="nav-link">首页</router-link><router-link to="/inspiration" class="nav-link">发现灵感</router-link><router-link to="/guide" class="nav-link">目的地指南</router-link><router-link to="/community" class="nav-link">社区足迹</router-link><router-link to="/about" class="nav-link">关于我们</router-link></div>
-      <div class="nav-actions"><button class="btn btn-outline theme-toggle" @click="toggleTheme"><svg v-if="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg></button><button class="btn btn-primary">开启探索</button></div>
-    </nav>
+      <div class="nav-actions"><button class="btn btn-outline theme-toggle" @click="toggleTheme"><svg v-if="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg></button><button class="btn btn-primary">开启探索</button><button class="hamburger" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }"><span></span><span></span><span></span></button></div><transition name="menu"><div class="mobile-menu" v-if="menuOpen" @click="menuOpen = false"><router-link to="/" class="mobile-link">首页</router-link><router-link to="/inspiration" class="mobile-link">发现灵感</router-link><router-link to="/guide" class="mobile-link">目的地指南</router-link><router-link to="/community" class="mobile-link">社区足迹</router-link><router-link to="/about" class="mobile-link">关于我们</router-link></div></transition></nav>
 
     <section class="page-hero"><div class="hero-gradient"></div><div class="hero-content">
       <h1 class="page-title serif">📖 <span class="gradient-text">目的地指南</span></h1>
@@ -52,7 +51,7 @@
 import { computed } from 'vue'
 export default {
   name: 'Guide',
-  data() { return { isDark: false, search: '', guides: [
+  data() { return { isDark: false, menuOpen: false, search: '', guides: [
     { city:'成都',emoji:'🐼',province:'四川省',rating:'4.8',bg:'linear-gradient(135deg,#a18cd1,#fbc2eb)',desc:'成都，一座来了就不想走的城市。这里有憨态可掬的大熊猫，有麻辣鲜香的火锅，有悠闲的茶馆文化，还有璀璨的三千年历史。',food:'火锅、串串香、担担面、龙抄手、钟水饺、兔头、钵钵鸡',attractions:'大熊猫繁育基地、宽窄巷子、武侯祠、锦里、都江堰、青城山',budget:'每日约 300-500 元（含住宿餐饮交通）',bestTime:'3-6月 / 9-11月，春秋最佳',tips:['建议预留至少3天','火锅推荐晚上去本地人多的店','大熊猫基地早上8点前去','地铁覆盖广，出行方便'] },
     { city:'大理',emoji:'🏔️',province:'云南省',rating:'4.7',bg:'linear-gradient(135deg,#667eea,#764ba2)',desc:'大理，风花雪月的代名词。苍山十九峰与洱海交相辉映，白族古城中保留着最纯粹的慢生活气息。',food:'乳扇、饵丝、鲜花饼、凉鸡米线、酸辣鱼、白族三道茶',attractions:'洱海环湖、大理古城、苍山索道、双廊古镇、崇圣寺三塔、喜洲古镇',budget:'每日约 200-400 元',bestTime:'3-5月 / 9-11月',tips:['环洱海建议租电动车或自驾','古城内住宿淡季性价比高','注意防晒，高原紫外线强','可以住一晚海景客栈'] },
     { city:'西安',emoji:'🏯',province:'陕西省',rating:'4.9',bg:'linear-gradient(135deg,#f093fb,#f5576c)',desc:'十三朝古都西安，承载着中华文明最辉煌的篇章。兵马俑、城墙、大雁塔……每一处都是活着的历史。',food:'肉夹馍、羊肉泡馍、凉皮、biangbiang面、灌汤包、甑糕',attractions:'兵马俑、华清宫、大雁塔、古城墙、回民街、陕西历史博物馆、大唐不夜城',budget:'每日约 300-500 元',bestTime:'3-5月 / 9-11月',tips:['兵马俑建议请讲解员','城墙可以租自行车骑行','回民街周边小巷子才是本地人去的','陕西历史博物馆需提前预约'] },
@@ -138,4 +137,11 @@ html.dark-mode .page-subtitle{color:#94a3b8;}
 .footer-bottom{max-width:1200px;margin:3rem auto 0;padding-top:2rem;border-top:1px solid var(--border-color);text-align:center;}
 .copyright{color:var(--text-secondary);font-size:0.9rem;}
 @media(max-width:768px){.nav-links{display:none;}.guide-sections{grid-template-columns:1fr;}.footer-content{grid-template-columns:1fr;gap:2rem;}.footer-links{grid-template-columns:repeat(2,1fr);}}
+
+.hamburger{display:none;flex-direction:column;gap:5px;padding:0.5rem;cursor:pointer;background:none;border:none;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text-primary);border-radius:2px;transition:all 0.3s;}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.active span:nth-child(2){opacity:0;}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{display:none;}
 </style>

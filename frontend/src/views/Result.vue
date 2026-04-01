@@ -25,13 +25,25 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           导出指南
         </button>
+        <button class="hamburger" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }">
+          <span></span><span></span><span></span>
+        </button>
       </div>
+      <transition name="menu">
+        <div class="mobile-menu" v-if="menuOpen" @click="menuOpen = false">
+          <router-link to="/" class="mobile-link">首页</router-link>
+          <router-link to="/inspiration" class="mobile-link">发现灵感</router-link>
+          <router-link to="/guide" class="mobile-link">目的地指南</router-link>
+          <router-link to="/community" class="mobile-link">社区足迹</router-link>
+          <router-link to="/about" class="mobile-link">关于我们</router-link>
+        </div>
+      </transition>
     </nav>
 
     <div class="result-content">
       <div class="overview-card glass-card">
-        <div class="overview-image">
-          <img :src="destinationImage" :alt="itinerary.overview?.destination">
+        <div class="overview-image" :style="{ background: destGradient }">
+          <span class="dest-emoji">{{ destEmoji }}</span>
           <div class="image-overlay">
             <span class="badge">AI 精选方案</span>
             <span class="date">{{ currentDate }} 生成</span>
@@ -114,25 +126,46 @@
 
 <script>
 import axios from 'axios'
+import html2canvas from 'html2canvas'
 export default {
   name: 'Result',
   data() {
     return {
       isDark: false,
+      menuOpen: false,
       itinerary: {},
       weather: { temperature: 22, condition: '多云转晴', detail: '加载中...', icon: 'sun', iconClass: 'sunny', alert: '' },
       packingList: [
-        { name: '证件与财务', items: [{ name: '身份证/护照', checked: false }, { name: '驾驶证', checked: false }, { name: '现金与银行卡', checked: false }] },
-        { name: '电子设备', items: [{ name: '手机与充电器', checked: false }, { name: '相机与存储卡', checked: false }, { name: '充电宝', checked: false }] },
-        { name: '个人用品', items: [{ name: '洗漱用品', checked: false }, { name: '防晒霜', checked: false }, { name: '常用药品', checked: false }] }
+        { name: '🪪 证件与财务', items: [{ name: '身份证/护照', checked: false }, { name: '驾驶证', checked: false }, { name: '现金与银行卡', checked: false }] },
+        { name: '📱 电子设备', items: [{ name: '手机与充电器', checked: false }, { name: '相机与存储卡', checked: false }, { name: '充电宝', checked: false }] },
+        { name: '🧳 个人用品', items: [{ name: '洗漱用品', checked: false }, { name: '防晒霜', checked: false }, { name: '常用药品', checked: false }] }
       ]
     }
   },
   computed: {
     currentDate() { const d = new Date(); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}` },
     destinationImage() {
-      const m = { '北京':'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80','上海':'https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?w=800&q=80','杭州':'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=800&q=80','成都':'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=800&q=80','西安':'https://images.unsplash.com/photo-1598316811207-d4b2d758fd5c?w=800&q=80' }
-      return m[this.itinerary.overview?.destination] || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80'
+      return ''
+    },
+    destGradient() {
+      const gradients = {
+        '北京': 'linear-gradient(135deg, #ff6b35, #f7c59f, #efefd0)',
+        '上海': 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+        '杭州': 'linear-gradient(135deg, #43e97b, #38f9d7, #a8edea)',
+        '成都': 'linear-gradient(135deg, #a18cd1, #fbc2eb, #f6d5f7)',
+        '西安': 'linear-gradient(135deg, #f093fb, #f5576c, #fda085)',
+        '南京': 'linear-gradient(135deg, #4facfe, #00f2fe, #43e97b)',
+        '广州': 'linear-gradient(135deg, #fa709a, #fee140, #fda085)',
+        '深圳': 'linear-gradient(135deg, #6ee7b7, #3b82f6, #a78bfa)',
+        '重庆': 'linear-gradient(135deg, #f97316, #ef4444, #ec4899)',
+        '厦门': 'linear-gradient(135deg, #4facfe, #00f2fe, #667eea)',
+      }
+      const dest = this.itinerary.overview?.destination || ''
+      return gradients[dest] || 'linear-gradient(135deg, #10B981, #3B82F6, #8B5CF6)'
+    },
+    destEmoji() {
+      const emojis = { '北京':'🏛️','上海':'🌆','杭州':'🌿','成都':'🐼','西安':'⚔️','南京':'🏯','广州':'🌺','深圳':'💎','重庆':'🌶️','厦门':'🌊','丽江':'🏘️','大理':'🏔️','张家界':'⛰️','三亚':'🏖️','青岛':'🍺','苏州':'🎐','厦门':'🌊','哈尔滨':'❄️' }
+      return emojis[this.itinerary.overview?.destination] || '✈️'
     },
     totalBudget() {
       if (!this.itinerary.budget_breakdown) return 0
@@ -160,10 +193,34 @@ export default {
     toggleTheme() { this.isDark=!this.isDark; this.applyTheme(); localStorage.setItem('theme', this.isDark?'dark':'light') },
     applyTheme() { this.isDark ? document.documentElement.classList.add('dark-mode') : document.documentElement.classList.remove('dark-mode') },
     goHome() { this.$router.push('/') },
-    exportResult() {
-      const d = JSON.stringify(this.itinerary, null, 2); const b = new Blob([d], {type:'application/json'}); const u = URL.createObjectURL(b)
-      const l = document.createElement('a'); l.href = u; l.download = `旅行计划_${this.itinerary.overview?.destination||'行程'}.json`
-      document.body.appendChild(l); l.click(); document.body.removeChild(l); URL.revokeObjectURL(u)
+    async exportResult() {
+      try {
+        const el = document.querySelector('.result-content')
+        if (!el) { console.error('element not found'); return }
+        // 临时切换到浅色模式截图
+        const wasDark = document.documentElement.classList.contains('dark-mode')
+        if (wasDark) document.documentElement.classList.remove('dark-mode')
+        await new Promise(r => setTimeout(r, 300))
+        const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' })
+        if (wasDark) document.documentElement.classList.add('dark-mode')
+        const imgData = canvas.toDataURL('image/jpeg', 0.92)
+        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4')
+        const imgW = 190, pageH = 277
+        const imgH = canvas.height * imgW / canvas.width
+        let heightLeft = imgH, position = 10
+        pdf.addImage(imgData, 'JPEG', 10, position, imgW, imgH)
+        heightLeft -= pageH
+        while (heightLeft > 0) {
+          position = heightLeft - imgH
+          pdf.addPage()
+          pdf.addImage(imgData, 'JPEG', 10, position, imgW, imgH)
+          heightLeft -= pageH
+        }
+        pdf.save(`旅行计划_${this.itinerary.overview?.destination || '行程'}.pdf`)
+      } catch (e) {
+        console.error('导出失败:', e)
+        alert('导出PDF失败: ' + e.message)
+      }
     },
     fetchWeatherData() {
       const dest = this.itinerary.overview?.destination; if (!dest) return
@@ -235,9 +292,8 @@ html.dark-mode{--bg-primary:#020617;--bg-secondary:#0f172a;--bg-nav:rgba(15,23,4
 .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 40px var(--shadow-color);}
 
 .overview-card{display:flex;gap:2rem;padding:2rem;border-radius:2rem;margin-bottom:2rem;overflow:hidden;}
-.overview-image{position:relative;width:300px;height:200px;border-radius:1.5rem;overflow:hidden;flex-shrink:0;}
-.overview-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s;}
-.overview-image:hover img{transform:scale(1.05);}
+.overview-image{position:relative;width:300px;height:200px;border-radius:1.5rem;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.dest-emoji{font-size:4rem;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));}
 .image-overlay{position:absolute;bottom:0;left:0;right:0;padding:1rem;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);display:flex;justify-content:space-between;align-items:flex-end;}
 .badge{background:linear-gradient(135deg,#10B981,#059669);color:white;padding:0.35rem 0.75rem;border-radius:9999px;font-size:0.7rem;font-weight:700;}
 .date{color:rgba(255,255,255,0.9);font-size:0.8rem;}
@@ -334,5 +390,12 @@ html.dark-mode .tag{background:rgba(96,165,250,0.15);}
 .copyright{color:var(--text-secondary);font-size:0.9rem;}
 
 @media(max-width:1024px){.main-grid{grid-template-columns:1fr;}.overview-card{flex-direction:column;}.overview-image{width:100%;height:200px;}.overview-stats{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:768px){.nav-links{display:none;}.result-content{padding:1rem;}.overview-stats{grid-template-columns:1fr;}.footer-content{grid-template-columns:1fr;gap:2rem;}.footer-links{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.nav-links{display:none;}.desktop-only{display:none;}.hamburger{display:flex;}.mobile-menu{display:flex;flex-direction:column;padding:1rem 1.5rem;background:var(--bg-nav);backdrop-filter:blur(20px);border-top:1px solid var(--border-color);}.mobile-link{padding:0.8rem 0;font-size:1rem;font-weight:500;color:var(--text-primary);text-decoration:none;border-bottom:1px solid var(--border-color);}.mobile-link:hover{color:var(--primary-color);}.menu-enter-active,.menu-leave-active{transition:all 0.3s ease;max-height:400px;overflow:hidden;}.menu-enter-from,.menu-leave-to{max-height:0;opacity:0;}.result-content{padding:1rem;}.overview-stats{grid-template-columns:1fr;}.footer-content{grid-template-columns:1fr;gap:2rem;}.footer-links{grid-template-columns:repeat(2,1fr);}}
+
+.hamburger{display:none;flex-direction:column;gap:5px;padding:0.5rem;cursor:pointer;background:none;border:none;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text-primary);border-radius:2px;transition:all 0.3s;}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.active span:nth-child(2){opacity:0;}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{display:none;}
 </style>

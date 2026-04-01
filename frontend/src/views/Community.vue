@@ -3,8 +3,7 @@
     <nav class="nav-bar">
       <div class="nav-brand"><div class="brand-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/></svg></div><router-link to="/" class="brand-text-link"><span class="brand-text">Voyage<span class="brand-highlight">AI</span></span></router-link></div>
       <div class="nav-links"><router-link to="/" class="nav-link">首页</router-link><router-link to="/inspiration" class="nav-link">发现灵感</router-link><router-link to="/guide" class="nav-link">目的地指南</router-link><router-link to="/community" class="nav-link">社区足迹</router-link><router-link to="/about" class="nav-link">关于我们</router-link></div>
-      <div class="nav-actions"><button class="btn btn-outline theme-toggle" @click="toggleTheme"><svg v-if="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg></button><button class="btn btn-primary">开启探索</button></div>
-    </nav>
+      <div class="nav-actions"><button class="btn btn-outline theme-toggle" @click="toggleTheme"><svg v-if="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg></button><button class="btn btn-primary">开启探索</button><button class="hamburger" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }"><span></span><span></span><span></span></button></div><transition name="menu"><div class="mobile-menu" v-if="menuOpen" @click="menuOpen = false"><router-link to="/" class="mobile-link">首页</router-link><router-link to="/inspiration" class="mobile-link">发现灵感</router-link><router-link to="/guide" class="mobile-link">目的地指南</router-link><router-link to="/community" class="mobile-link">社区足迹</router-link><router-link to="/about" class="mobile-link">关于我们</router-link></div></transition></nav>
 
     <section class="page-hero"><div class="hero-gradient"></div><div class="hero-content">
       <h1 class="page-title serif">🌏 <span class="gradient-text">社区足迹</span></h1>
@@ -53,7 +52,7 @@
 <script>
 export default {
   name: 'Community',
-  data() { return { isDark: false, stats: [
+  data() { return { isDark: false, menuOpen: false, stats: [
     {num:'12,847',label:'旅行者'},{num:'38,291',label:'行程方案'},{num:'5,632',label:'旅行故事'},{num:'218',label:'覆盖城市'}
   ], stories: [
     {id:1,author:'行者无疆',avatar:'🧑',avatarBg:'linear-gradient(135deg,#667eea,#764ba2)',time:'2天前',title:'大理7天深度游——我找到了理想的慢生活',content:'离开大理的那天，我在洱海边坐了很久。苍山的云在头顶飘过，白族老阿妈在旁边卖着鲜花饼。这次AI帮我规划了7天行程，完美避开了人潮，体验了最地道的大理生活。',tags:['大理','慢旅行','7天行程'],likes:234,comments:45},
@@ -156,4 +155,11 @@ html.dark-mode .page-subtitle{color:#94a3b8;}
 .footer-bottom{max-width:1200px;margin:3rem auto 0;padding-top:2rem;border-top:1px solid var(--border-color);text-align:center;}
 .copyright{color:var(--text-secondary);font-size:0.9rem;}
 @media(max-width:768px){.nav-links{display:none;}.stats-bar{grid-template-columns:1fr 1fr;}.footer-content{grid-template-columns:1fr;gap:2rem;}.footer-links{grid-template-columns:repeat(2,1fr);}}
+
+.hamburger{display:none;flex-direction:column;gap:5px;padding:0.5rem;cursor:pointer;background:none;border:none;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text-primary);border-radius:2px;transition:all 0.3s;}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.active span:nth-child(2){opacity:0;}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{display:none;}
 </style>

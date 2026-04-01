@@ -18,7 +18,19 @@
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         </button>
         <button class="btn btn-primary">开启探索</button>
+        <button class="hamburger" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }">
+          <span></span><span></span><span></span>
+        </button>
       </div>
+      <transition name="menu">
+        <div class="mobile-menu" v-if="menuOpen" @click="menuOpen = false">
+          <router-link to="/" class="mobile-link">首页</router-link>
+          <router-link to="/inspiration" class="mobile-link">发现灵感</router-link>
+          <router-link to="/guide" class="mobile-link">目的地指南</router-link>
+          <router-link to="/community" class="mobile-link">社区足迹</router-link>
+          <router-link to="/about" class="mobile-link">关于我们</router-link>
+        </div>
+      </transition>
     </nav>
 
     <section class="page-hero">
@@ -86,7 +98,7 @@
 <script>
 export default {
   name: 'Inspiration',
-  data() { return { isDark: false, destinations: [
+  data() { return { isDark: false, menuOpen: false, destinations: [
     { name:'成都',emoji:'🐼',bg:'linear-gradient(135deg,#a18cd1,#fbc2eb)',desc:'天府之国，美食与文化的天堂',tags:['美食','文化','休闲'] },
     { name:'大理',emoji:'🏔️',bg:'linear-gradient(135deg,#667eea,#764ba2)',desc:'风花雪月，苍山洱海的诗意栖居',tags:['自然','摄影','文艺'] },
     { name:'西安',emoji:'🏯',bg:'linear-gradient(135deg,#f093fb,#f5576c)',desc:'千年古都，历史的厚重回响',tags:['历史','美食','人文'] },
@@ -184,4 +196,11 @@ html.dark-mode .tag{background:rgba(96,165,250,0.15);}
 .footer-bottom{max-width:1200px;margin:3rem auto 0;padding-top:2rem;border-top:1px solid var(--border-color);text-align:center;}
 .copyright{color:var(--text-secondary);font-size:0.9rem;}
 @media(max-width:768px){.nav-links{display:none;}.card-grid{grid-template-columns:1fr;}.footer-content{grid-template-columns:1fr;gap:2rem;}.footer-links{grid-template-columns:repeat(2,1fr);}}
+
+.hamburger{display:none;flex-direction:column;gap:5px;padding:0.5rem;cursor:pointer;background:none;border:none;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text-primary);border-radius:2px;transition:all 0.3s;}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.active span:nth-child(2){opacity:0;}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{display:none;}
 </style>
