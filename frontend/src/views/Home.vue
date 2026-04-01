@@ -91,7 +91,7 @@
       <div class="features-grid">
         <router-link to="/inspiration" class="feature-card glass-card card-hover">
           <div class="feature-icon bg-emerald-light">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
           </div>
           <h3 class="feature-title">灵感发现</h3>
           <p class="feature-desc">通过智能算法，为您的旅行提供个性化灵感建议，发现不一样的风景。</p>
@@ -99,7 +99,7 @@
         </router-link>
         <router-link to="/guide" class="feature-card glass-card card-hover">
           <div class="feature-icon bg-blue-light">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="rgba(255,255,255,0.9)"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
           </div>
           <h3 class="feature-title">目的地指南</h3>
           <p class="feature-desc">详尽的目的地信息，深度解析当地文化、美食、景点，助您轻松规划行程。</p>
