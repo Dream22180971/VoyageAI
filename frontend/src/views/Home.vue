@@ -91,7 +91,7 @@
       <div class="features-grid">
         <router-link to="/inspiration" class="feature-card glass-card card-hover">
           <div class="feature-icon bg-emerald-light">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           </div>
           <h3 class="feature-title">灵感发现</h3>
           <p class="feature-desc">通过智能算法，为您的旅行提供个性化灵感建议，发现不一样的风景。</p>
@@ -99,7 +99,7 @@
         </router-link>
         <router-link to="/guide" class="feature-card glass-card card-hover">
           <div class="feature-icon bg-blue-light">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="rgba(255,255,255,0.9)"/></svg>
           </div>
           <h3 class="feature-title">目的地指南</h3>
           <p class="feature-desc">详尽的目的地信息，深度解析当地文化、美食、景点，助您轻松规划行程。</p>
@@ -107,7 +107,7 @@
         </router-link>
         <router-link to="/community" class="feature-card glass-card card-hover">
           <div class="feature-icon bg-purple-light">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
           </div>
           <h3 class="feature-title">社区足迹</h3>
           <p class="feature-desc">了解其他旅行者的足迹，分享经验，获取更多灵感和实用建议。</p>
