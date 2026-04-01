@@ -331,72 +331,220 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
         # 返回模拟数据
         return get_mock_data(start, dest, days, budget)
 
+# 目的地定制化数据库
+DESTINATION_DATA = {
+    "北京": {
+        "best_season": "3-5月 / 9-11月",
+        "pace": "适中偏紧凑",
+        "highlights": 8,
+        "daily_plan": [
+            {"title": "皇城初探·中轴线巡礼", "activities": [
+                {"time": "上午", "title": "天安门广场 & 故宫博物院", "description": "从天安门步行进入故宫，建议走中轴线+东西六宫路线，预留3-4小时。提前在「故宫博物院」小程序预约门票。"},
+                {"time": "下午", "title": "景山公园俯瞰紫禁城", "description": "登上景山万春亭，360度俯瞰故宫全景，是北京最佳拍照点之一。"},
+                {"time": "傍晚", "title": "南锣鼓巷漫步", "description": "在胡同里感受老北京烟火气，品尝炸酱面、卤煮、豆汁等地道小吃。"}
+            ]},
+            {"title": "长城壮志·中华文化", "activities": [
+                {"time": "上午", "title": "慕田峪长城", "description": "比八达岭人少景美，建议缆车上山步行下山，感受万里长城的磅礴气势。"},
+                {"time": "下午", "title": "明十三陵·定陵", "description": "探索明代皇家陵寝，感受历史的厚重与庄严。"},
+                {"time": "傍晚", "title": "鸟巢 & 水立方夜景", "description": "奥林匹克公园夜景璀璨，适合拍照打卡。"}
+            ]},
+            {"title": "皇家园林·文艺胡同", "activities": [
+                {"time": "上午", "title": "颐和园", "description": "昆明湖畔漫步长廊，登万寿山远眺，感受皇家园林的极致之美。"},
+                {"time": "下午", "title": "圆明园遗址公园", "description": "在大水法遗址前感受历史的沧桑。"},
+                {"time": "傍晚", "title": "798艺术区", "description": "当代艺术殿堂，各种画廊、咖啡馆和创意小店，文艺气息十足。"}
+            ]},
+            {"title": "市井烟火·地道京味", "activities": [
+                {"time": "上午", "title": "天坛公园", "description": "看祈年殿、回音壁，感受明清皇家祭天文化的庄严。"},
+                {"time": "下午", "title": "前门大街 & 大栅栏", "description": "逛百年老字号，瑞蚨祥、同仁堂、全聚德，体验老北京商业文化。"},
+                {"time": "傍晚", "title": "什刹海酒吧街", "description": "在湖边酒吧小酌，听着驻唱歌手的民谣，结束完美旅程。"}
+            ]}
+        ],
+        "packing": ["身份证（故宫/长城需实名）", "舒适运动鞋（长城步行必备）", "防晒霜（户外景点多）", "充电宝（全天拍照耗电大）", "保温杯（北京早晚温差大）"]
+    },
+    "上海": {
+        "best_season": "3-5月 / 10-12月",
+        "pace": "悠闲",
+        "highlights": 7,
+        "daily_plan": [
+            {"title": "外滩璀璨·魔都初见", "activities": [
+                {"time": "上午", "title": "豫园 & 城隍庙", "description": "江南古典园林代表，品尝南翔小笼、蟹壳黄等上海经典小吃。"},
+                {"time": "下午", "title": "南京路步行街", "description": "中国第一商业街，从和平饭店一路逛到人民广场。"},
+                {"time": "傍晚", "title": "外滩万国建筑群", "description": "黄浦江畔欣赏万国建筑博览会，等待陆家嘴灯光亮起的震撼瞬间。"}
+            ]},
+            {"title": "浦东风华·艺术之旅", "activities": [
+                {"time": "上午", "title": "上海中心大厦观光", "description": "中国第一高楼118层观光厅，360度俯瞰魔都全貌。"},
+                {"time": "下午", "title": "中华艺术宫（原世博会中国馆）", "description": "免费参观大型艺术展览，感受中国当代艺术的魅力。"},
+                {"time": "傍晚", "title": "田子坊", "description": "石库门里弄改造的文艺街区，各种手作店、咖啡馆、画廊。"}
+            ]},
+            {"title": "法租界浪漫·小资生活", "activities": [
+                {"time": "上午", "title": "武康路漫步", "description": "梧桐树荫下的法租界老洋房，武康大楼是必拍地标。"},
+                {"time": "下午", "title": "思南公馆", "description": "花园洋房群中的露天咖啡馆，享受上海最慵懒的午后。"},
+                {"time": "傍晚", "title": "新天地", "description": "石库门建筑群中的时尚餐饮聚集地，夜晚氛围最佳。"}
+            ]}
+        ],
+        "packing": ["轻薄外套（室内空调冷）", "舒适步行鞋", "充电宝", "墨镜（拍照加分）", "雨伞（上海多阵雨）"]
+    },
+    "成都": {
+        "best_season": "3-6月 / 9-11月",
+        "pace": "悠闲",
+        "highlights": 8,
+        "daily_plan": [
+            {"title": "熊猫之都·慢生活启程", "activities": [
+                {"time": "上午", "title": "大熊猫繁育研究基地", "description": "8点前入园看大熊猫最活跃的进食时间！月亮产房可以看到小熊猫宝宝。"},
+                {"time": "下午", "title": "宽窄巷子", "description": "清朝古街道改造的文化街区，掏耳朵、盖碗茶、三大炮，体验地道成都生活。"},
+                {"time": "傍晚", "title": "人民公园喝盖碗茶", "description": "在鹤鸣茶社点一杯竹叶青，听旁边大爷摆龙门阵，感受成都慢生活精髓。"}
+            ]},
+            {"title": "三国遗韵·火辣美食", "activities": [
+                {"time": "上午", "title": "武侯祠 & 锦里", "description": "三国圣地武侯祠，旁边的锦里古街是体验民俗和购买伴手礼的好去处。"},
+                {"time": "下午", "title": "杜甫草堂", "description": "诗圣故居，竹林幽径中的文学圣地。"},
+                {"time": "傍晚", "title": "建设路美食街", "description": "烤脑花、冒椒火辣、降龙爪爪……本地人最爱的深夜美食据点。"}
+            ]},
+            {"title": "都江古堰·青城仙山", "activities": [
+                {"time": "上午", "title": "都江堰水利工程", "description": "两千年前的水利奇迹，鱼嘴、飞沙堰、宝瓶口三大工程令人叹为观止。"},
+                {"time": "下午", "title": "青城山前山", "description": "道教名山，空气清新，登顶约2-3小时，感受'青城天下幽'。"},
+                {"time": "傍晚", "title": "玉林路小酒馆", "description": "赵雷歌里的玉林路，走走停停，找个小酒馆坐坐，体验成都夜生活。"}
+            ]}
+        ],
+        "packing": ["肠胃药（辛辣食物备需）", "防晒（紫外线强）", "雨伞（多阴雨）", "舒适运动鞋", "充电宝"]
+    },
+    "西安": {
+        "best_season": "3-5月 / 9-11月",
+        "pace": "紧凑",
+        "highlights": 9,
+        "daily_plan": [
+            {"title": "千年古都·始皇雄风", "activities": [
+                {"time": "上午", "title": "秦始皇兵马俑博物馆", "description": "世界第八大奇迹！建议请讲解员，一号坑的军阵令人震撼。提前在公众号预约。"},
+                {"time": "下午", "title": "华清宫", "description": "唐明皇与杨贵妃的爱情圣地，体验《长恨歌》实景演出的震撼。"},
+                {"time": "傍晚", "title": "回民街 & 洒金桥", "description": "肉夹馍、羊肉泡馍、biangbiang面……西安美食的灵魂就在这些小巷子里。"}
+            ]},
+            {"title": "城墙骑行·大唐不夜城", "activities": [
+                {"time": "上午", "title": "西安古城墙", "description": "中国现存最完整的古城墙，租自行车骑行一圈约1.5小时，俯瞰古今交融的西安。"},
+                {"time": "下午", "title": "陕西历史博物馆", "description": "十八件国宝级文物，从周秦汉唐到宋元明清，看完一部中国通史。需提前预约！"},
+                {"time": "傍晚", "title": "大唐不夜城", "description": "亚洲最大唐文化主题步行街，灯火辉煌如梦回长安，不倒翁小姐姐在此。"}
+            ]},
+            {"title": "大雁塔·文艺长安", "activities": [
+                {"time": "上午", "title": "大雁塔 & 大慈恩寺", "description": "玄奘法师翻译佛经之地，登塔远眺西安城区。"},
+                {"time": "下午", "title": "大唐芙蓉园", "description": "中国最大的仿唐皇家建筑群，园内演出精彩，拍照效果极佳。"},
+                {"time": "傍晚", "title": "永兴坊非遗美食街", "description": "摔碗酒、子长煎饼、陕北民歌，体验最地道的陕西非遗文化。"}
+            ]}
+        ],
+        "packing": ["舒适运动鞋（城墙/兵马俑步行多）", "防晒霜", "充电宝", "身份证（多处实名预约）", "保温杯"]
+    },
+    "杭州": {
+        "best_season": "3-5月 / 9-11月",
+        "pace": "悠闲",
+        "highlights": 7,
+        "daily_plan": [
+            {"title": "西湖十景·诗画江南", "activities": [
+                {"time": "上午", "title": "断桥残雪 & 白堤", "description": "西湖最经典路线，沿白堤漫步至孤山，感受白娘子与许仙的爱情传说。"},
+                {"time": "下午", "title": "灵隐寺", "description": "千年古刹，飞来峰石刻造像精美，寺内香火鼎盛。"},
+                {"time": "傍晚", "title": "南山路 & 湖滨银泰", "description": "沿湖咖啡馆一条街，夕阳下的西湖美不胜收。"}
+            ]},
+            {"title": "龙井问茶·宋韵古街", "activities": [
+                {"time": "上午", "title": "龙井村茶园", "description": "漫步茶园梯田，品一杯正宗龙井，感受采茶的乐趣。"},
+                {"time": "下午", "title": "南宋御街 & 河坊街", "description": "仿古商业街，各种杭州特色小吃和手工艺品。"},
+                {"time": "傍晚", "title": "西溪湿地", "description": "非诚勿扰拍摄地，摇橹船穿梭芦苇荡间，感受城市中的世外桃源。"}
+            ]},
+            {"title": "千岛碧水·良渚文明", "activities": [
+                {"time": "上午", "title": "良渚古城遗址公园", "description": "五千年前中华文明曙光，世界文化遗产。"},
+                {"time": "下午", "title": "中国美术学院象山校区", "description": "王澍普利兹克奖建筑作品，建筑与自然的完美融合。"},
+                {"time": "傍晚", "title": "钱塘江夜景", "description": "灯光秀震撼人心，城市阳台是最佳观赏点。"}
+            ]}
+        ],
+        "packing": ["雨伞（杭州多雨）", "舒适步行鞋", "防晒霜", "充电宝", "轻薄外套"]
+    }
+}
+
 def get_mock_data(start, dest, days, budget):
-    """临时模拟数据，当模型不可用时使用"""
+    """根据目的地生成定制化模拟数据，当AI模型不可用时使用"""
     budget_num = parse_budget_to_number(budget)
     
-    # 生成对应天数的行程
+    # 查找是否有该目的地的定制数据
+    dest_info = DESTINATION_DATA.get(dest)
+    
+    if dest_info and len(dest_info["daily_plan"]) > 0:
+        daily_plan = []
+        template_days = dest_info["daily_plan"]
+        
+        for day in range(1, days + 1):
+            if day <= len(template_days):
+                # 使用目的地专属行程
+                template = template_days[day - 1]
+                daily_plan.append({
+                    "day": day,
+                    "title": template["title"],
+                    "activities": template["activities"]
+                })
+            elif day == days:
+                # 最后一天：返程
+                daily_plan.append({
+                    "day": day,
+                    "title": f"最后时光·告别{dest}",
+                    "activities": [
+                        {"time": "上午", "title": "自由活动", "description": f"回到{dest}最喜欢的角落，再逛一逛、拍一拍，留下最后的回忆。"},
+                        {"time": "下午", "title": f"返回{start}", "description": f"收拾行李，带着满满的回忆启程返回{start}。"}
+                    ]
+                })
+            else:
+                # 中间额外天数：深度探索
+                daily_plan.append({
+                    "day": day,
+                    "title": f"深度探索·第{day}天",
+                    "activities": [
+                        {"time": "上午", "title": f"{dest}隐藏景点", "description": f"避开游客热门路线，探索{dest}本地人推荐的私藏好去处。"},
+                        {"time": "下午", "title": "特色手作体验", "description": f"参与{dest}当地特色的手工体验活动，制作属于自己的旅行纪念品。"},
+                        {"time": "傍晚", "title": "美食探店", "description": f"打卡{dest}网红餐厅或小巷深处的大排档，发现更多美味。"}
+                    ]
+                })
+        
+        return {
+            "overview": {
+                "destination": dest,
+                "days": days,
+                "budget": budget,
+                "best_season": dest_info["best_season"],
+                "pace": dest_info["pace"],
+                "highlights_count": dest_info["highlights"]
+            },
+            "daily_plan": daily_plan,
+            "weather_alert": {"city": dest, "temp": "22°C", "condition": "晴朗", "warning": "紫外线较强，注意防晒"},
+            "budget_breakdown": calculate_budget_breakdown(budget_num),
+            "packing_list": dest_info.get("packing", ["身份证", "充电器", "舒适鞋子", "防晒霜"]),
+            "model_info": {"model_used": "destination_template", "provider": f"{dest}定制模板", "note": f"已为{dest}生成专属行程方案"}
+        }
+    
+    # 无定制数据的通用行程
     daily_plan = []
-    
-    # 第1天：抵达和初探
     daily_plan.append({
-        "day": 1,
-        "title": f"抵达{dest}，初探城市风貌",
+        "day": 1, "title": f"抵达{dest}·初探城市",
         "activities": [
-            {"time": "上午", "title": f"从{start}出发", "description": f"建议乘坐早班航班前往{dest}。", "icon": "solar:plain-2-bold"},
-            {"time": "下午", "title": "城市观光", "description": "游览标志性景点，品尝当地美食。", "icon": "solar:chef-hat-heart-bold"},
-            {"time": "傍晚", "title": "海滨落日", "description": "在最佳观景点欣赏日落。", "icon": "solar:sunset-bold"}
+            {"time": "上午", "title": f"从{start}出发前往{dest}", "description": f"建议乘坐早班交通工具，预留充足时间抵达{dest}。"},
+            {"time": "下午", "title": "城市核心区漫步", "description": f"入住酒店后，在{dest}的市中心区域散步，熟悉周边环境。"},
+            {"time": "傍晚", "title": "当地美食初体验", "description": f"找一家当地人推荐的餐厅，品尝{dest}的特色美食。"}
         ]
     })
-    
-    # 第2天：文化体验
     daily_plan.append({
-        "day": 2,
-        "title": "文化深度体验",
+        "day": 2, "title": "经典景点打卡",
         "activities": [
-            {"time": "上午", "title": "历史遗迹", "description": "参观著名古迹。", "icon": "solar:castle-bold"},
-            {"time": "下午", "title": "传统手工艺体验", "description": "参与当地手作工坊。", "icon": "solar:palette-bold"}
+            {"time": "上午", "title": f"{dest}标志性景点", "description": f"游览{dest}最著名的景点，建议提前在线购票。"},
+            {"time": "下午", "title": "文化体验", "description": f"参观{dest}的博物馆或文化街区，了解当地历史文化。"},
+            {"time": "傍晚", "title": "夜景观赏", "description": f"在{dest}的最佳观景点欣赏夜景。"}
         ]
     })
-    
-    # 第3天及以后的行程
     for day in range(3, days + 1):
-        if day == 3:
-            daily_plan.append({
-                "day": day,
-                "title": "自然风光探索",
-                "activities": [
-                    {"time": "上午", "title": "郊外徒步", "description": "探索周边自然景观。", "icon": "solar:hiking-bold"},
-                    {"time": "下午", "title": "特色体验", "description": "参与当地特色活动。", "icon": "solar:flag-bold"}
-                ]
-            })
-        elif day == 4:
-            daily_plan.append({
-                "day": day,
-                "title": "休闲放松日",
-                "activities": [
-                    {"time": "上午", "title": "自由活动", "description": "根据个人兴趣安排。", "icon": "solar:sun-bold"},
-                    {"time": "下午", "title": "购物体验", "description": "购买当地特色纪念品。", "icon": "solar:shopping-bag-bold"}
-                ]
-            })
-        elif day == 5:
-            daily_plan.append({
-                "day": day,
-                "title": "告别之旅",
-                "activities": [
-                    {"time": "上午", "title": "最后游览", "description": "再次游览喜欢的景点。", "icon": "solar:map-point-bold"},
-                    {"time": "下午", "title": "返程准备", "description": "收拾行李，准备返回。", "icon": "solar:briefcase-bold"}
-                ]
-            })
-        else:  # 超过5天的情况
-            daily_plan.append({
-                "day": day,
-                "title": f"深度探索第{day-2}天",
-                "activities": [
-                    {"time": "上午", "title": "特色景点", "description": "游览当地特色景点。", "icon": "solar:mountain-bold"},
-                    {"time": "下午", "title": "美食探索", "description": "品尝更多当地美食。", "icon": "solar:fork-knife-bold"}
-                ]
-            })
+        if day == days:
+            daily_plan.append({"day": day, "title": f"告别{dest}", "activities": [{"time": "上午", "title": "最后游览", "description": f"再逛逛{dest}喜欢的角落。"}, {"time": "下午", "title": f"返回{start}", "description": f"收拾行李，带着回忆返回{start}。"}]})
+        else:
+            daily_plan.append({"day": day, "title": f"深度探索第{day}天", "activities": [{"time": "上午", "title": f"{dest}周边景点", "description": f"探索{dest}周边的自然风光或特色小镇。"}, {"time": "下午", "title": "自由活动", "description": "根据个人兴趣自由安排，购物、美食或休息。"}]})
+    
+    return {
+        "overview": {"destination": dest, "days": days, "budget": budget, "best_season": "春秋", "pace": "适中", "highlights_count": 6},
+        "daily_plan": daily_plan,
+        "weather_alert": {"city": dest, "temp": "22°C", "condition": "晴朗", "warning": "天气适宜出行。"},
+        "budget_breakdown": calculate_budget_breakdown(budget_num),
+        "packing_list": ["身份证", "充电器", "舒适鞋子", "防晒霜", "常用药品"],
+        "model_info": {"model_used": "generic_template", "provider": "通用模板", "note": "DeepSeek API调用失败，使用通用行程模板。配置API Key可获取AI定制行程。"}
+    }
     
     return {
         "overview": {

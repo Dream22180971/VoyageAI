@@ -238,7 +238,7 @@ export default {
         days: parseInt(this.form.days), budget: this.form.budget
       }).then(response => {
         clearInterval(interval); this.loadingProgress = 100
-        setTimeout(() => { this.loading = false; this.$router.push({ name: 'Result', query: { data: JSON.stringify(response.data) } }) }, 500)
+        setTimeout(() => { this.loading = false; const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))); this.$router.push({ name: 'Result', query: { d: encoded } }) }, 500)
       }).catch(error => {
         clearInterval(interval); this.loading = false
         console.error('生成行程失败:', error); alert('生成行程失败，请稍后重试')
