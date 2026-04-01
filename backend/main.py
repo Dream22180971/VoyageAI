@@ -47,10 +47,7 @@ app.add_middleware(
 )
 
 # 初始化DeepSeek客户端
-deepseek_client = OpenAI(
-    api_key=settings.deepseek_api_key,
-    base_url="https://api.deepseek.com/v1"
-)
+deepseek_client = None
 
 DEEPSEEK_MODEL = "deepseek-chat"
 
@@ -246,6 +243,11 @@ def get_weather_warning(weather_data: dict) -> str:
 
 async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> dict:
     """调用 DeepSeek 生成结构化行程（包含预算约束）"""
+    
+    # 如果DeepSeek客户端未初始化，直接返回模拟数据
+    if deepseek_client is None:
+        print("DeepSeek客户端未初始化，使用模拟数据")
+        return get_mock_data(start, dest, days, budget)
     
     prompt = f"""
 你是一个专业的旅行规划师。请根据以下信息生成详细的行程规划：
@@ -597,4 +599,4 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8001)

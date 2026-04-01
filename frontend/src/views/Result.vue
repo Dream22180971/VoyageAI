@@ -14,10 +14,10 @@
       </div>
       
       <div class="nav-links">
-        <a href="#" class="nav-link">发现灵感</a>
-        <a href="#" class="nav-link">目的地指南</a>
-        <a href="#" class="nav-link">社区足迹</a>
-        <a href="#" class="nav-link">关于我们</a>
+        <router-link to="/inspiration" class="nav-link">发现灵感</router-link>
+        <router-link to="/guide" class="nav-link">目的地指南</router-link>
+        <router-link to="/community" class="nav-link">社区足迹</router-link>
+        <router-link to="/about" class="nav-link">关于我们</router-link>
       </div>
       
       <div class="nav-actions">
