@@ -1,0 +1,21 @@
+{
+  "status": "1",
+  "count": "1",
+  "info": "OK",
+  "infocode": "10000",
+  "lives": [
+    {
+      "province": "江苏",
+      "city": "南京市",
+      "adcode": "320100",
+      "weather": "晴",
+      "temperature": "16",
+      "winddirection": "西南",
+      "windpower": "≤3",
+      "humidity": "62",
+      "reporttime": "2026-04-01 20:04:42",
+      "temperature_float": "16.0",
+      "humidity_float": "62.0"
+    }
+  ]
+}

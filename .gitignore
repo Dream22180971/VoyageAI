@@ -1,0 +1,24 @@
+# Environment
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Node
+frontend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Continue
+.continue/
