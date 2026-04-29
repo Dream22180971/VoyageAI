@@ -5,6 +5,9 @@
   <a href="https://47.103.214.75">在线体验</a> · Vue 3 + FastAPI + DeepSeek
 </p>
 
+
+<img width="1910" height="911" alt="image" src="https://github.com/user-attachments/assets/01199332-3089-43ee-a543-7c0c37db3b57" />
+
 ---
 
 ## ✨ 功能亮点
