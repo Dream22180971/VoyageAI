@@ -155,6 +155,9 @@
 
     <!-- 功能卡片区域 -->
     <section class="features-section">
+      <div class="section-head">
+        <h2 class="section-title serif">一站式服务</h2>
+      </div>
       <div class="features-grid">
         <router-link to="/inspiration" class="feature-card feature-card--image card-hover">
           <div class="feature-media" aria-hidden="true">
@@ -216,66 +219,97 @@
     <section class="social-proof">
       <div class="social-proof-inner">
         <div class="proof-header">
-          <h2 class="proof-title serif">早期用户反馈</h2>
+          <h2 class="proof-title serif">用户声音</h2>
         </div>
 
-        <div class="trust-badges" aria-label="信任徽章">
-          <div class="trust-badge">
-            <span class="badge-icon badge-icon--lock" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                <rect x="5" y="11" width="14" height="10" rx="2" />
-              </svg>
-            </span>
-            <div class="badge-text">
-              <div class="badge-title">隐私优先</div>
-              <div class="badge-desc">密钥本地配置，不入仓库</div>
-            </div>
-          </div>
-          <div class="trust-badge">
-            <span class="badge-icon badge-icon--bolt" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
-              </svg>
-            </span>
-            <div class="badge-text">
-              <div class="badge-title">秒级生成</div>
-              <div class="badge-desc">模板兜底，稳定可用</div>
-            </div>
-          </div>
-          <div class="trust-badge">
-            <span class="badge-icon badge-icon--spark" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2l1.3 4.8L18 9l-4.7 1.3L12 15l-1.3-4.7L6 9l4.7-2.2L12 2z" />
-                <path d="M19 12l.9 3.1L23 16l-3.1.9L19 20l-.9-3.1L15 16l3.1-.9L19 12z" />
-              </svg>
-            </span>
-            <div class="badge-text">
-              <div class="badge-title">AI + 真实攻略</div>
-              <div class="badge-desc">路线/预算/清单一体化</div>
+        <div class="testimonials-marquee" aria-label="用户评价滚动">
+          <div class="marquee-viewport">
+            <div class="marquee-track">
+              <article v-for="t in testimonials" :key="`a-${t.id}`" class="testimonial-card">
+                <div class="t-top">
+                  <div class="avatar" :style="{ background: t.avatarBg }" aria-hidden="true">
+                    <span class="avatar-text">{{ t.initials }}</span>
+                  </div>
+                  <div class="t-meta">
+                    <div class="t-name">{{ t.name }}</div>
+                    <div class="t-sub">{{ t.meta }}</div>
+                  </div>
+                  <div class="t-rating" :aria-label="`评分 ${t.rating} / 5`">
+                    <span v-for="n in 5" :key="n" class="star" :class="{ on: n <= t.rating }">★</span>
+                  </div>
+                </div>
+                <p class="t-quote">“{{ t.quote }}”</p>
+                <div class="t-tags">
+                  <span v-for="tag in t.tags" :key="tag" class="tag">{{ tag }}</span>
+                </div>
+              </article>
+
+              <!-- duplicate for seamless loop -->
+              <article v-for="t in testimonials" :key="`b-${t.id}`" class="testimonial-card" aria-hidden="true">
+                <div class="t-top">
+                  <div class="avatar" :style="{ background: t.avatarBg }" aria-hidden="true">
+                    <span class="avatar-text">{{ t.initials }}</span>
+                  </div>
+                  <div class="t-meta">
+                    <div class="t-name">{{ t.name }}</div>
+                    <div class="t-sub">{{ t.meta }}</div>
+                  </div>
+                  <div class="t-rating" aria-hidden="true">
+                    <span v-for="n in 5" :key="n" class="star" :class="{ on: n <= t.rating }">★</span>
+                  </div>
+                </div>
+                <p class="t-quote">“{{ t.quote }}”</p>
+                <div class="t-tags">
+                  <span v-for="tag in t.tags" :key="tag" class="tag">{{ tag }}</span>
+                </div>
+              </article>
             </div>
           </div>
         </div>
 
-        <div class="testimonials" aria-label="用户评价">
-          <article v-for="t in testimonials" :key="t.id" class="testimonial-card">
-            <div class="t-top">
-              <div class="avatar" :style="{ background: t.avatarBg }" aria-hidden="true">
-                <span class="avatar-text">{{ t.initials }}</span>
-              </div>
-              <div class="t-meta">
-                <div class="t-name">{{ t.name }}</div>
-                <div class="t-sub">{{ t.meta }}</div>
-              </div>
-              <div class="t-rating" :aria-label="`评分 ${t.rating} / 5`">
-                <span v-for="n in 5" :key="n" class="star" :class="{ on: n <= t.rating }">★</span>
-              </div>
+        <div class="testimonials-marquee testimonials-marquee--second" aria-label="用户评价滚动（第二行）">
+          <div class="marquee-viewport">
+            <div class="marquee-track marquee-track--reverse">
+              <article v-for="t in testimonials" :key="`c-${t.id}`" class="testimonial-card">
+                <div class="t-top">
+                  <div class="avatar" :style="{ background: t.avatarBg }" aria-hidden="true">
+                    <span class="avatar-text">{{ t.initials }}</span>
+                  </div>
+                  <div class="t-meta">
+                    <div class="t-name">{{ t.name }}</div>
+                    <div class="t-sub">{{ t.meta }}</div>
+                  </div>
+                  <div class="t-rating" :aria-label="`评分 ${t.rating} / 5`">
+                    <span v-for="n in 5" :key="n" class="star" :class="{ on: n <= t.rating }">★</span>
+                  </div>
+                </div>
+                <p class="t-quote">“{{ t.quote }}”</p>
+                <div class="t-tags">
+                  <span v-for="tag in t.tags" :key="tag" class="tag">{{ tag }}</span>
+                </div>
+              </article>
+
+              <!-- duplicate for seamless loop -->
+              <article v-for="t in testimonials" :key="`d-${t.id}`" class="testimonial-card" aria-hidden="true">
+                <div class="t-top">
+                  <div class="avatar" :style="{ background: t.avatarBg }" aria-hidden="true">
+                    <span class="avatar-text">{{ t.initials }}</span>
+                  </div>
+                  <div class="t-meta">
+                    <div class="t-name">{{ t.name }}</div>
+                    <div class="t-sub">{{ t.meta }}</div>
+                  </div>
+                  <div class="t-rating" aria-hidden="true">
+                    <span v-for="n in 5" :key="n" class="star" :class="{ on: n <= t.rating }">★</span>
+                  </div>
+                </div>
+                <p class="t-quote">“{{ t.quote }}”</p>
+                <div class="t-tags">
+                  <span v-for="tag in t.tags" :key="tag" class="tag">{{ tag }}</span>
+                </div>
+              </article>
             </div>
-            <p class="t-quote">“{{ t.quote }}”</p>
-            <div class="t-tags">
-              <span v-for="tag in t.tags" :key="tag" class="tag">{{ tag }}</span>
-            </div>
-          </article>
+          </div>
         </div>
       </div>
     </section>
@@ -608,10 +642,14 @@ export default {
       return isValid
     },
     applyExample(ex) {
-      if (!ex || !ex.payload) return
-      this.form = { ...this.form, ...ex.payload }
+      if (!ex) return
+      if (this.loading) return
+      if (ex.payload) this.form = { ...this.form, ...ex.payload }
+      if (ex.text) this.aiPrompt = ex.text
       // bring the form into view for mobile users
       try { window.scrollTo({ top: 0, behavior: 'smooth' }) } catch (_) {}
+      // trigger planning immediately for better "it works" feedback
+      this.$nextTick(() => this.sendPrompt())
     },
     openPlanner() {
       this.plannerOpen = true
@@ -1086,6 +1124,8 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
 
 /* 功能卡片 */
 .features-section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+.section-head { display: flex; align-items: baseline; justify-content: flex-start; margin-bottom: 1.75rem; }
+.section-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; color: #111827; }
 .features-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
 .feature-card {
   border-radius: 1.5rem; text-align: left; text-decoration: none; color: inherit;
@@ -1191,49 +1231,56 @@ html.dark-mode .social-proof-inner {
 .proof-title { font-size: 1.9rem; margin: 0 0 0.35rem; color: var(--text-primary); }
 .proof-subtitle { margin: 0; color: var(--text-secondary); font-size: 0.98rem; }
 
-.trust-badges {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-.trust-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 1rem 1.1rem;
-  border-radius: 1.2rem;
-  background: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 14px 40px rgba(2, 6, 23, 0.08);
-}
-html.dark-mode .trust-badge {
-  background: rgba(2, 6, 23, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
-}
-.badge-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.96);
-  flex: 0 0 auto;
-}
-.badge-icon svg { width: 22px; height: 22px; }
-.badge-icon--lock { background: linear-gradient(135deg, rgba(16,185,129,.95), rgba(5,150,105,.95)); }
-.badge-icon--bolt { background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(37,99,235,.95)); }
-.badge-icon--spark { background: linear-gradient(135deg, rgba(139,92,246,.95), rgba(99,102,241,.95)); }
-.badge-title { font-weight: 800; color: var(--text-primary); font-size: 0.98rem; }
-.badge-desc { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.15rem; }
+.testimonials { display: none; }
 
-.testimonials {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1.2rem;
+.testimonials-marquee { margin-top: 1.2rem; }
+.testimonials-marquee--second { margin-top: 0.9rem; opacity: 0.98; }
+.marquee-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.6rem;
+  padding: 0.25rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-viewport::before,
+.marquee-viewport::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  pointer-events: none;
+  z-index: 2;
+}
+.marquee-viewport::before { left: 0; background: linear-gradient(90deg, rgba(255,255,255,0.98), rgba(255,255,255,0)); }
+.marquee-viewport::after { right: 0; background: linear-gradient(270deg, rgba(255,255,255,0.98), rgba(255,255,255,0)); }
+html.dark-mode .marquee-viewport::before { background: linear-gradient(90deg, rgba(2,6,23,0.92), rgba(2,6,23,0)); }
+html.dark-mode .marquee-viewport::after { background: linear-gradient(270deg, rgba(2,6,23,0.92), rgba(2,6,23,0)); }
+
+.marquee-track {
+  display: flex;
+  gap: 1.25rem;
+  width: max-content;
+  padding: 0.5rem 0.5rem;
+  animation: testimonials-marquee 28s linear infinite;
+  will-change: transform;
+}
+.marquee-viewport:hover .marquee-track { animation-play-state: paused; }
+
+@keyframes testimonials-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee-track--reverse {
+  animation-duration: 32s;
+  animation-direction: reverse;
+}
+
+.marquee-track .testimonial-card {
+  width: 360px;
+  flex: 0 0 auto;
 }
 .testimonial-card {
   padding: 1.2rem 1.2rem 1.1rem;
@@ -1478,6 +1525,8 @@ html.dark-mode .pack-item { background: rgba(99,102,241,0.14); border: 1px solid
   .field-divider { display: none; }
   .field-group { padding: 0; }
   .features-section { padding: 4rem 1rem; }
+  .section-head { margin-bottom: 1.25rem; }
+  .section-title { font-size: 1.8rem; }
   .features-grid { grid-template-columns: 1fr; gap: 1.25rem; }
   .feature-media { height: 170px; }
   .ai-entry { margin-top: 1rem; }
@@ -1485,8 +1534,9 @@ html.dark-mode .pack-item { background: rgba(99,102,241,0.14); border: 1px solid
   .ai-send { width: 100%; justify-content: center; }
   .social-proof { padding: 1.75rem 1rem 4rem; }
   .social-proof-inner { padding: 1.5rem; }
-  .trust-badges { grid-template-columns: 1fr; }
-  .testimonials { grid-template-columns: 1fr; }
+  .marquee-viewport { -webkit-mask-image: none; mask-image: none; }
+  .marquee-track { animation-duration: 34s; }
+  .marquee-track .testimonial-card { width: 290px; }
   .demo-section { padding: 0 1rem 4rem; }
   .demo-inner { padding: 1.5rem; }
   .demo-grid { grid-template-columns: 1fr; }
@@ -1497,6 +1547,11 @@ html.dark-mode .pack-item { background: rgba(99,102,241,0.14); border: 1px solid
   .footer-content { grid-template-columns: 1fr; gap: 2rem; }
   .footer-links { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
   .chip-text { white-space: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; transform: none; }
+  .marquee-viewport { overflow-x: auto; }
 }
 .hamburger { display: none; flex-direction: column; gap: 5px; padding: 0.5rem; cursor: pointer; background: none; border: none; }
 .hamburger span { display: block; width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: all 0.3s; }

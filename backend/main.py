@@ -3,6 +3,7 @@ import json
 import httpx
 import re
 import asyncio
+import random
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -248,7 +249,7 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
     # 如果DeepSeek客户端未初始化，直接返回模拟数据
     if deepseek_client is None:
         print("DeepSeek客户端未初始化，使用模拟数据")
-        return get_mock_data(start, dest, days, budget)
+        return build_realistic_mock_itinerary(start, dest, days, budget)
     
     prompt = f"""
 你是一个专业的旅行规划师。请根据以下信息生成详细的行程规划：
@@ -274,10 +275,14 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
       "title": "当日主题",
       "activities": [
         {{
-          "time": "时间段",
-          "title": "活动名称",
-          "description": "详细描述（请根据预算{budget}推荐合适的消费场所和活动）",
-          "icon": "solar:xxx"
+          "time": "时间段（例如 09:00-12:00）",
+          "title": "活动名称（具体地点/街区）",
+          "description": "详细描述（避免空话，给出动线/注意事项；请根据预算{budget}推荐合适消费）",
+          "transport": "交通方式（地铁/步行/打车/公交/高铁等，给出建议）",
+          "duration": "预计耗时（例如 2-3 小时）",
+          "food": ["用餐推荐 1", "用餐推荐 2"],
+          "alternatives": ["备选方案 1（下雨/人多/闭馆时）", "备选方案 2"],
+          "booking_tip": "门票/预约提示（若需要预约，说明平台与提前多久）"
         }}
       ]
     }}
@@ -330,7 +335,7 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
     except Exception as e:
         print(f"DeepSeek API 调用失败：{e}")
         # 返回模拟数据
-        return get_mock_data(start, dest, days, budget)
+        return build_realistic_mock_itinerary(start, dest, days, budget)
 
 # 目的地定制化数据库
 DESTINATION_DATA = {
@@ -455,6 +460,226 @@ DESTINATION_DATA = {
         "packing": ["雨伞（杭州多雨）", "舒适步行鞋", "防晒霜", "充电宝", "轻薄外套"]
     }
 }
+
+def _stable_rng(*parts: str) -> random.Random:
+    seed = "|".join([p or "" for p in parts])
+    # deterministic across restarts for same input
+    return random.Random(seed)
+
+def normalize_destination(dest: str) -> str:
+    """Normalize ambiguous destinations into a concrete city."""
+    d = (dest or "").strip()
+    if not d:
+        return d
+    # Strip prompt tails accidentally included in destination
+    # e.g. "北京玩5天" / "北京5日" / "东京自由行"
+    d = re.sub(r'(?:玩|游玩|游|旅行|自由行|之旅)\s*\d+\s*(?:天|日).*$', '', d)
+    d = re.sub(r'\d+\s*(?:天|日).*$', '', d)
+    d = re.sub(r'(?:玩|游玩|游|旅行|自由行|之旅).*$', '', d)
+    d = d.strip()
+    # common aliases
+    alias = {
+        "日本": "东京",
+        "Japan": "东京",
+        "东京": "东京",
+        "大阪": "大阪",
+        "京都": "京都",
+        "韩国": "首尔",
+        "Korea": "首尔",
+        "泰国": "曼谷",
+        "Thailand": "曼谷",
+    }
+    return alias.get(d, d)
+
+# A lightweight POI pool used when AI is unavailable. Keep it simple & realistic.
+POI_DB = {
+    "东京": {
+        "best_season": "3-5月 / 10-12月",
+        "pace": "适中",
+        "highlights": 10,
+        "areas": ["浅草", "上野", "银座", "涩谷", "新宿", "原宿表参道", "秋叶原", "台场"],
+        "days": [
+            {
+                "title": "浅草·上野：传统与博物馆",
+                "activities": [
+                    {"time": "08:30-10:30", "title": "浅草寺 & 仲见世商店街", "description": "早到人少更好拍；顺路在仲见世买人形烧/雷门周边小吃。", "transport": "地铁至浅草站 + 步行", "duration": "约 2 小时", "food": ["浅草周边和菓子/人形烧", "雷门附近天妇罗/荞麦面"], "alternatives": ["下雨：改去浅草文化观光中心观景台", "人太多：改走花屋敷周边小路"], "booking_tip": "浅草寺无需预约；热门时段注意排队与人流。"},
+                    {"time": "10:45-12:30", "title": "隅田公园散步（可选东京晴空塔外观）", "description": "步行衔接浅草区域；想登塔可提前预约时段票。", "transport": "步行/1 站地铁", "duration": "约 1.5 小时", "food": ["隅田川沿岸咖啡", "晴空塔商场轻食"], "alternatives": ["阴雨：改去晴空塔 Solamachi 商场", "想省钱：仅拍外观不登塔"], "booking_tip": "登晴空塔建议提前在官网/平台预约时段票。"},
+                    {"time": "13:30-16:30", "title": "上野公园 & 博物馆二选一", "description": "推荐东京国立博物馆/国立西洋美术馆；行程别排太满，留体力。", "transport": "地铁至上野站 + 步行", "duration": "约 3 小时", "food": ["上野站周边拉面/定食", "公园周边便当+草地休息"], "alternatives": ["闭馆日：改去上野动物园/不忍池", "带孩子：优先动物园"], "booking_tip": "部分特展需预约或限流；出发前查看馆方官网。"},
+                    {"time": "18:00-20:00", "title": "阿美横丁晚餐", "description": "海鲜丼/居酒屋很集中；饭点排队正常，预算适中可选连锁寿司或烧鸟。", "transport": "步行/地铁 10-20 分钟", "duration": "约 2 小时", "food": ["海鲜丼", "烧鸟/居酒屋小食"], "alternatives": ["不想排队：改去上野站内美食街", "想更安静：去御徒町小巷店"], "booking_tip": "多数店不预约，尽量错峰 17:30 或 20:00 后。"},
+                ],
+            },
+            {
+                "title": "涩谷·原宿：年轻潮流与街拍",
+                "activities": [
+                    {"time": "09:30-11:00", "title": "明治神宫晨间参拜", "description": "树林步道很治愈；参观约1小时，周末人多。"},
+                    {"time": "11:15-13:00", "title": "原宿竹下通 & 表参道", "description": "甜品/潮店集中；喜欢安静可以走表参道支路。"},
+                    {"time": "14:00-16:30", "title": "涩谷十字路口 & SHIBUYA SKY（可选）", "description": "观景台建议提前预约；不登台也可在周边商场/咖啡厅取景。"},
+                    {"time": "18:00-20:30", "title": "涩谷/惠比寿晚餐", "description": "拉面/烧肉选择多；晚饭后可轻松逛街收尾。"},
+                ],
+            },
+            {
+                "title": "新宿·歌舞伎町：城市夜景与购物",
+                "activities": [
+                    {"time": "09:30-11:30", "title": "新宿御苑", "description": "适合慢走+拍照；花季需注意闭园日。"},
+                    {"time": "12:00-13:30", "title": "新宿午餐（拉面/咖喱）", "description": "建议错峰；连锁店也很稳。"},
+                    {"time": "14:00-17:30", "title": "新宿站周边百货/电器店购物", "description": "药妆、电器可集中采购；留意退税门槛与护照。"},
+                    {"time": "19:00-21:00", "title": "都厅展望台夜景（免费）", "description": "相比收费观景台更省预算；若排队可改去周边高层咖啡厅。"},
+                ],
+            },
+            {
+                "title": "秋叶原·二次元补给",
+                "activities": [
+                    {"time": "10:00-12:30", "title": "秋叶原电器街漫逛", "description": "手办/中古店很多；先比价再下手。"},
+                    {"time": "13:30-16:30", "title": "主题店/周边店打卡", "description": "按兴趣选择（动画、游戏、模型）；部分店铺周末拥挤。"},
+                    {"time": "18:00-20:30", "title": "神田/秋叶原周边晚餐", "description": "想吃更地道可去神田小巷；不想折腾就选站内美食街。"},
+                ],
+            },
+            {
+                "title": "台场：海湾线与夜景",
+                "activities": [
+                    {"time": "10:00-12:00", "title": "台场海滨公园散步", "description": "晴天很出片；可看彩虹大桥与海湾景观。"},
+                    {"time": "13:00-16:30", "title": "teamLab/商场二选一", "description": "teamLab需提前预约；不去展就逛 DiverCity/维纳斯城堡。"},
+                    {"time": "18:00-20:00", "title": "海湾夜景+晚餐", "description": "日落前后最美；返回市区建议避开通勤高峰。"},
+                ],
+            },
+        ],
+        "packing": ["护照/签证材料", "Suica/PASMO（或手机交通卡）", "转换插头", "舒适步行鞋", "随身零钱/硬币包", "充电宝"],
+    },
+    "首尔": {
+        "best_season": "4-6月 / 9-11月",
+        "pace": "适中",
+        "highlights": 8,
+        "areas": ["景福宫", "北村韩屋村", "弘大", "明洞", "梨泰院", "东大门"],
+        "days": [],
+        "packing": ["护照/签证材料", "转换插头", "舒适步行鞋", "充电宝"],
+    },
+}
+
+def build_realistic_mock_itinerary(start: str, dest: str, days: int, budget: str) -> dict:
+    """More realistic non-AI itinerary: concrete places, time blocks, and movement."""
+    budget_num = parse_budget_to_number(budget)
+    dest_norm = normalize_destination(dest)
+    rng = _stable_rng(start, dest_norm, str(days), budget)
+
+    def _time_block(label: str) -> str:
+        m = {
+            "上午": "09:00-12:00",
+            "中午": "12:00-13:30",
+            "下午": "13:30-17:00",
+            "傍晚": "17:30-19:30",
+            "晚上": "19:30-21:30",
+        }
+        return m.get(label, label)
+
+    def _enhance_activity(a: dict) -> dict:
+        # keep keys compatible with frontend (time/title/description)
+        time = _time_block(a.get("time", ""))
+        title = a.get("title") or a.get("name") or ""
+        desc = (a.get("description") or "").strip()
+        # add a light, practical note to avoid generic tone
+        if desc and "建议" not in desc:
+            desc += "（尽量同一区域串联，地铁+步行优先，少折返）"
+        # best-effort structured hints for template activities
+        transport = a.get("transport") or ("地铁/步行" if "公园" in title or "胡同" in title else "地铁为主，必要时打车")
+        duration = a.get("duration") or ("约 2-3 小时" if time in ("09:00-12:00", "13:30-17:00") else "约 1-2 小时")
+        food = a.get("food") or []
+        alternatives = a.get("alternatives") or []
+        booking_tip = a.get("booking_tip") or ("热门景点建议提前 1-3 天预约/购票" if ("博物馆" in title or "故宫" in title or "长城" in title) else "")
+        return {
+            "time": time,
+            "title": title,
+            "description": desc,
+            "transport": transport,
+            "duration": duration,
+            "food": food,
+            "alternatives": alternatives,
+            "booking_tip": booking_tip,
+        }
+
+    # If we have a POI pack, use it; otherwise enhance existing templates.
+    pack = POI_DB.get(dest_norm)
+    if pack:
+        base_days = pack.get("days", [])
+        daily_plan = []
+        for i in range(days):
+            if i < len(base_days):
+                d = base_days[i]
+                daily_plan.append({"day": i + 1, "title": d["title"], "activities": d["activities"]})
+            else:
+                # extra days: pick a relaxed structure around areas
+                area = rng.choice(pack.get("areas", [dest_norm]))
+                daily_plan.append({
+                    "day": i + 1,
+                    "title": f"{area}·自由探索与补漏",
+                    "activities": [
+                        {"time": "10:00-12:00", "title": f"{area}慢逛（咖啡/街区）", "description": "按兴趣补打卡；建议把购物/伴手礼放在最后几天集中处理。"},
+                        {"time": "14:00-17:00", "title": "备选体验（二选一）", "description": "根据天气选择室内展馆/商场，或改为公园散步+拍照。"},
+                        {"time": "18:00-20:30", "title": "当地晚餐（不赶行程）", "description": "挑离住宿近的区域，避免跨城折返；让旅行更轻松。"},
+                    ],
+                })
+
+        return {
+            "overview": {
+                "destination": dest_norm,
+                "days": days,
+                "budget": budget,
+                "best_season": pack.get("best_season", "春秋"),
+                "pace": pack.get("pace", "适中"),
+                "highlights_count": pack.get("highlights", 6),
+            },
+            "daily_plan": daily_plan,
+            "budget_breakdown": calculate_budget_breakdown(budget_num),
+            "packing_list": pack.get("packing", ["身份证/护照", "充电器", "舒适鞋子", "防晒霜"]),
+            "model_info": {"model_used": "realistic_mock", "provider": "规则+POI库兜底", "note": "AI 未配置时使用更真实的行程生成"},
+        }
+
+    # If we have destination-specific templates, enhance them into more realistic blocks.
+    dest_info = DESTINATION_DATA.get(dest_norm)
+    if dest_info and dest_info.get("daily_plan"):
+        template_days = dest_info["daily_plan"]
+        daily_plan = []
+        for day in range(1, days + 1):
+            if day <= len(template_days):
+                t = template_days[day - 1]
+                acts = [_enhance_activity(a) for a in (t.get("activities") or [])]
+                daily_plan.append({"day": day, "title": t.get("title", f"第{day}天"), "activities": acts})
+            elif day == days:
+                daily_plan.append({
+                    "day": day,
+                    "title": f"收尾与返程·告别{dest_norm}",
+                    "activities": [
+                        {"time": "09:30-11:30", "title": "轻松补漏（咖啡/伴手礼）", "description": "把没买到的伴手礼集中补齐；尽量选离住宿近的商圈。"},
+                        {"time": "12:30-15:30", "title": f"返程：{dest_norm} → {start}", "description": "预留前往车站/机场的时间；重要证件与充电器最后再检查一遍。"},
+                    ],
+                })
+            else:
+                daily_plan.append({
+                    "day": day,
+                    "title": f"城市深挖·慢一点也很值（第{day}天）",
+                    "activities": [
+                        {"time": "10:00-12:00", "title": "本地生活街区散步", "description": f"避开景区主干道，去{dest_norm}更生活化的街区走走，找一家评分高的小店吃早午餐。"},
+                        {"time": "14:00-17:00", "title": "小型展馆/公园二选一", "description": "按天气决定：雨天选展馆，晴天选公园/城市步道，行程更真实舒服。"},
+                        {"time": "18:00-20:00", "title": "当日主题晚餐", "description": "把当地特色餐放在晚上，白天轻食更不累；注意错峰避免排队过久。"},
+                    ],
+                })
+
+        return {
+            "overview": {
+                "destination": dest_norm,
+                "days": days,
+                "budget": budget,
+                "best_season": dest_info.get("best_season", "春秋"),
+                "pace": dest_info.get("pace", "适中"),
+                "highlights_count": dest_info.get("highlights", 6),
+            },
+            "daily_plan": daily_plan,
+            "budget_breakdown": calculate_budget_breakdown(budget_num),
+            "packing_list": dest_info.get("packing", ["身份证", "充电器", "舒适鞋子", "防晒霜"]),
+            "model_info": {"model_used": "realistic_template", "provider": f"{dest_norm}增强模板", "note": "AI 未配置时使用更真实的模板行程"},
+        }
+
+    # fallback to the existing generic templates
+    return get_mock_data(start, dest_norm, days, budget)
 
 def get_mock_data(start, dest, days, budget):
     """根据目的地生成定制化模拟数据，当AI模型不可用时使用"""

@@ -21,9 +21,13 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           返回首页
         </button>
-        <button class="btn btn-primary" @click="exportResult">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          导出指南
+        <button class="btn btn-outline" @click="exportMarkdown">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M8 9h2"/></svg>
+          导出 MD
+        </button>
+        <button class="btn btn-outline" @click="exportJson">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7a3 3 0 0 1 3-3h3"/><path d="M20 7a3 3 0 0 0-3-3h-3"/><path d="M4 17a3 3 0 0 0 3 3h3"/><path d="M20 17a3 3 0 0 1-3 3h-3"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
+          导出 JSON
         </button>
         <button class="hamburger" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }">
           <span></span><span></span><span></span>
@@ -51,7 +55,7 @@
         </div>
         <div class="overview-info">
           <h1 class="overview-title serif">
-            <span class="destination">{{ itinerary.overview?.destination || '目的地' }}</span>
+            <span class="destination">{{ cleanDestination || '目的地' }}</span>
             <span class="days">{{ itinerary.overview?.days || 0 }}</span>日深度发现之旅
           </h1>
           <div class="overview-stats">
@@ -76,6 +80,24 @@
                     <div class="activity-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{{ activity.time }}</div>
                     <h4 class="activity-name">{{ activity.name || activity.title }}</h4>
                     <p class="activity-desc">{{ activity.description }}</p>
+                    <div class="activity-meta" v-if="activity.transport || activity.duration || (activity.food && activity.food.length) || (activity.alternatives && activity.alternatives.length) || activity.booking_tip">
+                      <div class="meta-row" v-if="activity.transport || activity.duration">
+                        <span class="meta-pill" v-if="activity.transport">交通：{{ activity.transport }}</span>
+                        <span class="meta-pill" v-if="activity.duration">耗时：{{ activity.duration }}</span>
+                      </div>
+                      <div class="meta-row" v-if="activity.food && activity.food.length">
+                        <span class="meta-label">用餐推荐</span>
+                        <span class="meta-text">{{ activity.food.slice(0, 3).join(' / ') }}</span>
+                      </div>
+                      <div class="meta-row" v-if="activity.booking_tip">
+                        <span class="meta-label">预约提示</span>
+                        <span class="meta-text">{{ activity.booking_tip }}</span>
+                      </div>
+                      <div class="meta-row" v-if="activity.alternatives && activity.alternatives.length">
+                        <span class="meta-label">备选方案</span>
+                        <span class="meta-text">{{ activity.alternatives.slice(0, 2).join('；') }}</span>
+                      </div>
+                    </div>
                     <div class="activity-tags" v-if="activity.tags"><span v-for="(tag, ti) in activity.tags" :key="ti" class="tag">{{ tag }}</span></div>
                   </div>
                 </div>
@@ -85,8 +107,8 @@
         </div>
 
         <div class="sidebar">
-          <div class="sidebar-card glass-card">
-            <div class="card-header"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>实时天气</h3><span class="city">{{ itinerary.overview?.destination }}</span></div>
+            <div class="sidebar-card glass-card">
+            <div class="card-header"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>实时天气</h3><span class="city">{{ cleanDestination }}</span></div>
             <div class="weather-main"><div class="weather-temp">{{ weather.temperature }}°</div><div class="weather-info"><p class="weather-condition">{{ weather.condition }}</p><p class="weather-detail">{{ weather.detail }}</p></div><div class="weather-icon" :class="weather.iconClass"><svg viewBox="0 0 24 24" fill="currentColor"><path v-if="weather.icon === 'sun'" d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/><path v-else d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></div></div>
             <div class="weather-alert" v-if="weather.alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p>{{ weather.alert }}</p></div>
           </div>
@@ -126,7 +148,6 @@
 
 <script>
 import axios from 'axios'
-import html2canvas from 'html2canvas'
 export default {
   name: 'Result',
   data() {
@@ -144,6 +165,17 @@ export default {
   },
   computed: {
     currentDate() { const d = new Date(); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}` },
+    cleanDestination() {
+      const raw = (this.itinerary?.overview?.destination || '').trim()
+      if (!raw) return ''
+      // Remove common prompt tails accidentally ending up in destination
+      // e.g. "北京玩5天" / "东京自由行" / "北京5日"
+      return raw
+        .replace(/(?:玩|游玩|游|旅行|自由行|之旅)\s*\d+\s*(?:天|日).*/u, '')
+        .replace(/\d+\s*(?:天|日).*/u, '')
+        .replace(/(?:玩|游玩|游|旅行|自由行|之旅).*/u, '')
+        .trim()
+    },
     destinationImage() {
       return ''
     },
@@ -160,12 +192,12 @@ export default {
         '重庆': 'linear-gradient(135deg, #f97316, #ef4444, #ec4899)',
         '厦门': 'linear-gradient(135deg, #4facfe, #00f2fe, #667eea)',
       }
-      const dest = this.itinerary.overview?.destination || ''
+      const dest = this.cleanDestination || ''
       return gradients[dest] || 'linear-gradient(135deg, #10B981, #3B82F6, #8B5CF6)'
     },
     destEmoji() {
       const emojis = { '北京':'🏛️','上海':'🌆','杭州':'🌿','成都':'🐼','西安':'⚔️','南京':'🏯','广州':'🌺','深圳':'💎','重庆':'🌶️','厦门':'🌊','丽江':'🏘️','大理':'🏔️','张家界':'⛰️','三亚':'🏖️','青岛':'🍺','苏州':'🎐','厦门':'🌊','哈尔滨':'❄️' }
-      return emojis[this.itinerary.overview?.destination] || '✈️'
+      return emojis[this.cleanDestination] || '✈️'
     },
     totalBudget() {
       if (!this.itinerary.budget_breakdown) return 0
@@ -193,37 +225,84 @@ export default {
     toggleTheme() { this.isDark=!this.isDark; this.applyTheme(); localStorage.setItem('theme', this.isDark?'dark':'light') },
     applyTheme() { this.isDark ? document.documentElement.classList.add('dark-mode') : document.documentElement.classList.remove('dark-mode') },
     goHome() { this.$router.push('/') },
-    async exportResult() {
-      try {
-        const el = document.querySelector('.result-content')
-        if (!el) { console.error('element not found'); return }
-        // 临时切换到浅色模式截图
-        const wasDark = document.documentElement.classList.contains('dark-mode')
-        if (wasDark) document.documentElement.classList.remove('dark-mode')
-        await new Promise(r => setTimeout(r, 300))
-        const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' })
-        if (wasDark) document.documentElement.classList.add('dark-mode')
-        const imgData = canvas.toDataURL('image/jpeg', 0.92)
-        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4')
-        const imgW = 190, pageH = 277
-        const imgH = canvas.height * imgW / canvas.width
-        let heightLeft = imgH, position = 10
-        pdf.addImage(imgData, 'JPEG', 10, position, imgW, imgH)
-        heightLeft -= pageH
-        while (heightLeft > 0) {
-          position = heightLeft - imgH
-          pdf.addPage()
-          pdf.addImage(imgData, 'JPEG', 10, position, imgW, imgH)
-          heightLeft -= pageH
-        }
-        pdf.save(`旅行计划_${this.itinerary.overview?.destination || '行程'}.pdf`)
-      } catch (e) {
-        console.error('导出失败:', e)
-        alert('导出PDF失败: ' + e.message)
+    downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    },
+    itineraryToMarkdown() {
+      const o = this.itinerary?.overview || {}
+      const dest = this.cleanDestination || o.destination || '目的地'
+      const days = o.days ?? ''
+      const budget = o.budget ?? ''
+      const best = o.best_season || ''
+      const pace = o.pace || ''
+      const lines = []
+      lines.push(`# ${dest}${days ? ` ${days} 日` : ''}行程`)
+      lines.push('')
+      lines.push(`- 生成日期：${this.currentDate}`)
+      if (days !== '') lines.push(`- 天数：${days}`)
+      if (budget !== '') lines.push(`- 预算：¥${budget}`)
+      if (best) lines.push(`- 最佳季节：${best}`)
+      if (pace) lines.push(`- 行程节奏：${pace}`)
+      lines.push('')
+
+      const daily = Array.isArray(this.itinerary?.daily_plan) ? this.itinerary.daily_plan : []
+      if (daily.length) {
+        lines.push('## 每日行程')
+        lines.push('')
+        daily.forEach((d) => {
+          lines.push(`### 第 ${d.day ?? ''} 天：${d.title || ''}`.trim())
+          const acts = Array.isArray(d.activities) ? d.activities : []
+          acts.forEach((a) => {
+            const time = a.time ? `**${a.time}** ` : ''
+            const name = a.name || a.title || ''
+            const desc = a.description ? ` — ${a.description}` : ''
+            lines.push(`- ${time}${name}${desc}`.trim())
+          })
+          lines.push('')
+        })
       }
+
+      const budgetList = Array.isArray(this.itinerary?.budget_breakdown) ? this.itinerary.budget_breakdown : []
+      if (budgetList.length) {
+        lines.push('## 预算拆分')
+        lines.push('')
+        budgetList.forEach((b) => {
+          const cat = b.category || '其他'
+          const amt = b.amount ?? ''
+          lines.push(`- ${cat}：${typeof amt === 'number' ? `¥${amt}` : String(amt)}`)
+        })
+        lines.push('')
+      }
+
+      const tips = this.itinerary?.tips
+      if (tips && typeof tips === 'string') {
+        lines.push('## 小贴士')
+        lines.push('')
+        lines.push(tips)
+        lines.push('')
+      }
+
+      return lines.join('\n').trim() + '\n'
+    },
+    exportMarkdown() {
+      const md = this.itineraryToMarkdown()
+      const name = `旅行计划_${this.cleanDestination || '行程'}_${this.currentDate}.md`
+      this.downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), name)
+    },
+    exportJson() {
+      const name = `旅行计划_${this.cleanDestination || '行程'}_${this.currentDate}.json`
+      const content = JSON.stringify(this.itinerary || {}, null, 2) + '\n'
+      this.downloadBlob(new Blob([content], { type: 'application/json;charset=utf-8' }), name)
     },
     fetchWeatherData() {
-      const dest = this.itinerary.overview?.destination; if (!dest) return
+      const dest = this.cleanDestination; if (!dest) return
       axios.get(`/api/weather?city=${encodeURIComponent(dest)}`).then(r => {
         const w = r.data; this.weather = { temperature: parseInt(w.temp.replace('°C','')), condition: w.condition, detail: w.warning||'天气适宜出行。', icon: w.condition.includes('晴')?'sun':'cloud', iconClass: w.condition.includes('晴')?'sunny':'cloudy', alert: w.warning||'' }
       }).catch(() => { this.weather = { temperature:22, condition:'多云转晴', detail:'天气数据获取失败', icon:'sun', iconClass:'sunny', alert:'' } })
@@ -335,6 +414,12 @@ html.dark-mode .day-theme{background:rgba(96,165,250,0.15);}
 .activity-time svg{width:14px;height:14px;}
 .activity-name{font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
 .activity-desc{font-size:0.9rem;color:var(--text-secondary);line-height:1.6;}
+.activity-meta{margin-top:0.75rem;display:flex;flex-direction:column;gap:0.45rem;}
+.meta-row{display:flex;flex-wrap:wrap;gap:0.5rem;align-items:baseline;}
+.meta-pill{background:rgba(16,185,129,0.10);color:var(--primary-color);border:1px solid rgba(16,185,129,0.22);padding:0.18rem 0.55rem;border-radius:9999px;font-size:0.75rem;font-weight:700;}
+html.dark-mode .meta-pill{background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.22);}
+.meta-label{font-size:0.75rem;font-weight:800;color:var(--text-primary);opacity:0.92;}
+.meta-text{font-size:0.82rem;color:var(--text-secondary);line-height:1.5;}
 .activity-tags{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;}
 .tag{background:rgba(16,185,129,0.1);color:var(--primary-color);padding:0.25rem 0.6rem;border-radius:9999px;font-size:0.75rem;}
 html.dark-mode .tag{background:rgba(96,165,250,0.15);}
