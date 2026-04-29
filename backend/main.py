@@ -76,6 +76,7 @@ async def get_weather_data(city: str) -> dict:
     """调用高德地图API获取实时天气"""
     # 创建客户端配置，添加重试机制
     async with httpx.AsyncClient(
+        trust_env=False,
         timeout=15.0,
         limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
         headers={

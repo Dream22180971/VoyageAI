@@ -11,6 +11,7 @@
         <router-link to="/" class="brand-text-link">
           <span class="brand-text">Voyage<span class="brand-highlight">AI</span></span>
         </router-link>
+        <span class="brand-slogan hide-mobile">发现未知，规划所爱</span>
       </div>
       <div class="nav-links">
         <router-link to="/" class="nav-link">首页</router-link>
@@ -44,6 +45,8 @@
     <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-bg">
+        <!-- Travel scene background (image). Swap to video if needed. -->
+        <div class="hero-media" aria-hidden="true"></div>
         <div class="hero-gradient"></div>
       </div>
       <div class="hero-content">
@@ -95,6 +98,57 @@
             <span v-else>规划中...</span>
             <svg class="btn-icon" :class="{ rotating: loading }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </button>
+
+          <!-- Quick examples -->
+          <div class="quick-examples" aria-label="快速示例">
+            <button
+              v-for="ex in quickExamples"
+              :key="ex.id"
+              class="example-chip"
+              type="button"
+              @click="applyExample(ex)"
+            >
+              <span class="chip-ai" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2l1.2 4.3L17.5 8l-4.3 1.2L12 13.5l-1.2-4.3L6.5 8l4.3-1.7L12 2z" fill="currentColor" opacity="0.95"/>
+                  <path d="M19 12l.8 2.8L22.5 16l-2.7.8L19 19.5l-.8-2.7L15.5 16l2.7-1.2L19 12z" fill="currentColor" opacity="0.65"/>
+                </svg>
+              </span>
+              <span class="chip-text">{{ ex.text }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- AI prompt box: chat-like entry point -->
+        <div class="ai-entry" aria-label="AI 输入区">
+          <div class="ai-entry-head">
+            <div class="ai-entry-title">
+              <span class="ai-pill" aria-hidden="true">
+                <span class="ai-pill-dot"></span>AI
+              </span>
+              <span>直接描述你的需求</span>
+            </div>
+            <button class="ai-entry-cta" type="button" @click="openPlannerWithDemo">
+              查看演示样例 →
+            </button>
+          </div>
+          <div class="ai-entry-box">
+            <textarea
+              v-model="aiPrompt"
+              class="ai-textarea"
+              rows="3"
+              placeholder="例如：帮我规划 5 天东京自由行，预算适中，喜欢美食和二次元"
+              @keydown.ctrl.enter.prevent="sendPrompt"
+            ></textarea>
+            <button class="ai-send" type="button" :disabled="loading || !aiPrompt.trim()" @click="sendPrompt">
+              <span>发送</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13" />
+                <path d="M22 2L15 22l-4-9-9-4 20-7z" />
+              </svg>
+            </button>
+          </div>
+          <div class="ai-entry-hint">提示：按 <strong>Ctrl + Enter</strong> 发送</div>
         </div>
       </div>
     </section>
@@ -102,30 +156,185 @@
     <!-- 功能卡片区域 -->
     <section class="features-section">
       <div class="features-grid">
-        <router-link to="/inspiration" class="feature-card glass-card card-hover">
-          <div class="feature-icon bg-purple-light">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <router-link to="/inspiration" class="feature-card feature-card--image card-hover">
+          <div class="feature-media" aria-hidden="true">
+            <div class="media-img media-img--inspiration"></div>
+            <div class="media-overlay"></div>
+            <div class="ai-badge">
+              <span class="ai-dot" aria-hidden="true"></span>
+              <span class="ai-text">AI</span>
+            </div>
           </div>
-          <h3 class="feature-title">灵感发现</h3>
-          <p class="feature-desc">通过智能算法，为您的旅行提供个性化灵感建议，发现不一样的风景。</p>
-          <span class="feature-btn-text">立即体验 →</span>
-        </router-link>
-        <router-link to="/guide" class="feature-card glass-card card-hover">
-          <div class="feature-icon bg-purple-light">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+          <div class="feature-body">
+            <div class="feature-top">
+              <h3 class="feature-title">灵感发现</h3>
+            </div>
+            <p class="feature-desc">探索未知与小众路线，AI 为你生成灵感清单与最佳出行时机。</p>
+            <span class="feature-btn-text">立即探索 →</span>
           </div>
-          <h3 class="feature-title">目的地指南</h3>
-          <p class="feature-desc">详尽的目的地信息，深度解析当地文化、美食、景点，助您轻松规划行程。</p>
-          <span class="feature-btn-text">查看指南 →</span>
         </router-link>
-        <router-link to="/community" class="feature-card glass-card card-hover">
-          <div class="feature-icon bg-purple-light">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+
+        <router-link to="/guide" class="feature-card feature-card--image card-hover">
+          <div class="feature-media" aria-hidden="true">
+            <div class="media-img media-img--guide"></div>
+            <div class="media-overlay"></div>
+            <div class="ai-badge ai-badge--blue">
+              <span class="ai-dot" aria-hidden="true"></span>
+              <span class="ai-text">AI</span>
+            </div>
           </div>
-          <h3 class="feature-title">社区足迹</h3>
-          <p class="feature-desc">了解其他旅行者的足迹，分享经验，获取更多灵感和实用建议。</p>
-          <span class="feature-btn-text">查看足迹 →</span>
+          <div class="feature-body">
+            <div class="feature-top">
+              <h3 class="feature-title">目的地指南</h3>
+            </div>
+            <p class="feature-desc">美食、文化与玩法路线一站式整理，快速了解“怎么玩才地道”。</p>
+            <span class="feature-btn-text">查看指南 →</span>
+          </div>
         </router-link>
+
+        <router-link to="/community" class="feature-card feature-card--image card-hover">
+          <div class="feature-media" aria-hidden="true">
+            <div class="media-img media-img--community"></div>
+            <div class="media-overlay"></div>
+            <div class="ai-badge ai-badge--purple">
+              <span class="ai-dot" aria-hidden="true"></span>
+              <span class="ai-text">AI</span>
+            </div>
+          </div>
+          <div class="feature-body">
+            <div class="feature-top">
+              <h3 class="feature-title">社区足迹</h3>
+            </div>
+            <p class="feature-desc">真实旅行者的照片与故事，找到最适合你的玩法与避坑建议。</p>
+            <span class="feature-btn-text">查看足迹 →</span>
+          </div>
+        </router-link>
+      </div>
+    </section>
+
+    <!-- 评价 / 信任徽章 -->
+    <section class="social-proof">
+      <div class="social-proof-inner">
+        <div class="proof-header">
+          <h2 class="proof-title serif">早期用户反馈</h2>
+        </div>
+
+        <div class="trust-badges" aria-label="信任徽章">
+          <div class="trust-badge">
+            <span class="badge-icon badge-icon--lock" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+              </svg>
+            </span>
+            <div class="badge-text">
+              <div class="badge-title">隐私优先</div>
+              <div class="badge-desc">密钥本地配置，不入仓库</div>
+            </div>
+          </div>
+          <div class="trust-badge">
+            <span class="badge-icon badge-icon--bolt" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
+              </svg>
+            </span>
+            <div class="badge-text">
+              <div class="badge-title">秒级生成</div>
+              <div class="badge-desc">模板兜底，稳定可用</div>
+            </div>
+          </div>
+          <div class="trust-badge">
+            <span class="badge-icon badge-icon--spark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2l1.3 4.8L18 9l-4.7 1.3L12 15l-1.3-4.7L6 9l4.7-2.2L12 2z" />
+                <path d="M19 12l.9 3.1L23 16l-3.1.9L19 20l-.9-3.1L15 16l3.1-.9L19 12z" />
+              </svg>
+            </span>
+            <div class="badge-text">
+              <div class="badge-title">AI + 真实攻略</div>
+              <div class="badge-desc">路线/预算/清单一体化</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonials" aria-label="用户评价">
+          <article v-for="t in testimonials" :key="t.id" class="testimonial-card">
+            <div class="t-top">
+              <div class="avatar" :style="{ background: t.avatarBg }" aria-hidden="true">
+                <span class="avatar-text">{{ t.initials }}</span>
+              </div>
+              <div class="t-meta">
+                <div class="t-name">{{ t.name }}</div>
+                <div class="t-sub">{{ t.meta }}</div>
+              </div>
+              <div class="t-rating" :aria-label="`评分 ${t.rating} / 5`">
+                <span v-for="n in 5" :key="n" class="star" :class="{ on: n <= t.rating }">★</span>
+              </div>
+            </div>
+            <p class="t-quote">“{{ t.quote }}”</p>
+            <div class="t-tags">
+              <span v-for="tag in t.tags" :key="tag" class="tag">{{ tag }}</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo itinerary (always visible value preview) -->
+    <section class="demo-section">
+      <div class="demo-inner">
+        <div class="demo-head">
+          <h2 class="demo-title serif">5 天行程演示（示例）</h2>
+          <p class="demo-subtitle">让你不点任何按钮，也能一眼看到 VoyageAI 能输出什么。</p>
+          <button class="demo-open" type="button" @click="openPlannerWithDemo">在规划器里查看 →</button>
+        </div>
+
+        <div v-if="demoLoading" class="demo-loading">正在加载示例行程...</div>
+        <div v-else-if="demoItinerary" class="demo-grid">
+          <div class="demo-card">
+            <div class="demo-kpi">
+              <div class="kpi-label">目的地</div>
+              <div class="kpi-value">{{ demoItinerary.overview?.destination || '—' }}</div>
+            </div>
+            <div class="demo-kpi">
+              <div class="kpi-label">天数</div>
+              <div class="kpi-value">{{ demoItinerary.overview?.days || 5 }} 天</div>
+            </div>
+            <div class="demo-kpi">
+              <div class="kpi-label">预算</div>
+              <div class="kpi-value">{{ demoItinerary.overview?.budget || '—' }}</div>
+            </div>
+          </div>
+          <div class="demo-card demo-card--wide">
+            <div class="demo-list-title">每日安排（节选）</div>
+            <div class="demo-days">
+              <div v-for="d in (demoItinerary.daily_plan || []).slice(0, 3)" :key="d.day" class="demo-day">
+                <div class="day-badge">Day {{ d.day }}</div>
+                <div class="day-title">{{ d.title }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="demo-card demo-card--wide">
+            <div class="demo-list-title">预算拆分</div>
+            <div class="demo-budget">
+              <div v-for="b in (demoItinerary.budget_breakdown || [])" :key="b.category" class="budget-row">
+                <span class="budget-cat">{{ b.category }}</span>
+                <span class="budget-amt">¥ {{ b.amount }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card">
+            <div class="demo-list-title">行前清单（节选）</div>
+            <div class="demo-pack">
+              <span v-for="item in (demoItinerary.packing_list || []).slice(0, 10)" :key="item" class="demo-pack-item">
+                {{ item }}
+              </span>
+            </div>
+            <div class="demo-pack-hint">更多内容在规划器与结果页中查看。</div>
+          </div>
+        </div>
+        <div v-else class="demo-loading">示例行程暂不可用（稍后重试）。</div>
       </div>
     </section>
 
@@ -142,10 +351,6 @@
             <router-link to="/" class="brand-text-link"><span class="brand-text">Voyage<span class="brand-highlight">AI</span></span></router-link>
           </div>
           <p class="brand-desc">成立于 2026 年，我们致力于利用先进的 AI 技术为旅行者提供最纯粹的灵感发现体验。</p>
-          <div class="social-links">
-            <a href="#" class="social-link"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-            <a href="#" class="social-link"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-          </div>
         </div>
         <div class="footer-links">
           <div class="link-group">
@@ -194,6 +399,116 @@
         </div>
       </div>
     </transition>
+
+    <!-- Planner drawer / fullscreen -->
+    <transition name="drawer">
+      <div v-if="plannerOpen" class="drawer-backdrop" @click.self="closePlanner" aria-label="AI 规划器">
+        <div class="drawer">
+          <div class="drawer-head">
+            <div class="drawer-title">
+              <span class="drawer-ai">AI</span>
+              <span>旅行规划器</span>
+            </div>
+            <button class="drawer-close" type="button" @click="closePlanner" aria-label="关闭">✕</button>
+          </div>
+
+          <div class="drawer-body">
+            <div class="drawer-input">
+              <textarea
+                v-model="aiPrompt"
+                class="drawer-textarea"
+                rows="3"
+                placeholder="描述你的旅行需求（可包含：出发地、目的地、天数、预算、偏好）"
+                @keydown.ctrl.enter.prevent="sendPrompt"
+              ></textarea>
+              <div class="drawer-actions">
+                <button class="drawer-btn drawer-btn--secondary" type="button" @click="useDemoPrompt">
+                  使用演示示例
+                </button>
+                <button class="drawer-btn drawer-btn--primary" type="button" :disabled="loading || !aiPrompt.trim()" @click="sendPrompt">
+                  生成预览
+                </button>
+              </div>
+            </div>
+
+            <div v-if="plannerError" class="drawer-error">{{ plannerError }}</div>
+
+            <div v-if="plannerItinerary" class="drawer-preview">
+              <div class="preview-grid">
+                <div class="preview-card">
+                  <div class="preview-title">行程概览</div>
+                  <div class="preview-kpis">
+                    <div class="kpi">
+                      <div class="kpi-k">目的地</div>
+                      <div class="kpi-v">{{ plannerItinerary.overview?.destination || '—' }}</div>
+                    </div>
+                    <div class="kpi">
+                      <div class="kpi-k">天数</div>
+                      <div class="kpi-v">{{ plannerItinerary.overview?.days || '—' }}</div>
+                    </div>
+                    <div class="kpi">
+                      <div class="kpi-k">预算</div>
+                      <div class="kpi-v">{{ plannerItinerary.overview?.budget || '—' }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="preview-card preview-card--map">
+                  <div class="preview-title">地图 / 热点（占位）</div>
+                  <div class="map-skeleton">
+                    <div class="map-pin"></div>
+                    <div class="map-line"></div>
+                    <div class="map-line map-line--2"></div>
+                  </div>
+                  <div class="map-hint">接入地图服务后可展示路线、景点与餐馆分布。</div>
+                </div>
+
+                <div class="preview-card preview-card--wide">
+                  <div class="preview-title">每日安排</div>
+                  <div class="days">
+                    <div v-for="d in (plannerItinerary.daily_plan || [])" :key="d.day" class="day">
+                      <div class="day-left">
+                        <div class="day-chip">Day {{ d.day }}</div>
+                        <div class="day-name">{{ d.title }}</div>
+                      </div>
+                      <div class="day-right">{{ (d.activities || []).length }} 项活动</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="preview-card">
+                  <div class="preview-title">预算拆分</div>
+                  <div class="budget">
+                    <div v-for="b in (plannerItinerary.budget_breakdown || [])" :key="b.category" class="budget-row">
+                      <span class="budget-cat">{{ b.category }}</span>
+                      <span class="budget-amt">¥ {{ b.amount }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="preview-card">
+                  <div class="preview-title">行前清单</div>
+                  <div class="packing">
+                    <span v-for="item in (plannerItinerary.packing_list || []).slice(0, 10)" :key="item" class="pack-item">{{ item }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="drawer-footer">
+                <button class="drawer-btn drawer-btn--secondary" type="button" @click="applyItineraryToResult(plannerItinerary)">
+                  打开完整结果页
+                </button>
+              </div>
+            </div>
+
+            <div v-else class="drawer-empty">
+              <div class="empty-title">输入需求，马上看到 AI 的“即时回复”</div>
+              <div class="empty-desc">我们会先解析你输入的关键信息，再生成行程预览（无 AI Key 也有模板兜底）。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -209,13 +524,66 @@ export default {
       loadingProgress: 0,
       isDark: false,
       menuOpen: false,
-      errors: { start: '', dest: '', days: '', budget: '' }
+      errors: { start: '', dest: '', days: '', budget: '' },
+      aiPrompt: '',
+      quickExamples: [
+        {
+          id: 'tokyo-5d',
+          text: '帮我规划 5 天东京自由行，预算适中，喜欢美食和二次元',
+          payload: { start: '上海', dest: '东京', days: 5, budget: '8000-12000' }
+        },
+        {
+          id: 'sea-7d',
+          text: '从上海出发，推荐 7 天东南亚海岛度假',
+          payload: { start: '上海', dest: '巴厘岛', days: 7, budget: '12000-18000' }
+        }
+      ],
+      testimonials: [
+        {
+          id: 't1',
+          name: '小棠',
+          initials: 'XT',
+          meta: '上海 · 美食党',
+          rating: 5,
+          quote: '输入偏好后行程结构很清晰，预算拆分也合理，省了我做表格的时间。',
+          tags: ['东京', '美食', '自由行'],
+          avatarBg: 'linear-gradient(135deg, rgba(16,185,129,.55), rgba(59,130,246,.55))'
+        },
+        {
+          id: 't2',
+          name: '阿杰',
+          initials: 'AJ',
+          meta: '成都 · 周末短途',
+          rating: 5,
+          quote: '一键生成清单很实用，像充电宝/防晒/交通卡这种细节都会提醒到。',
+          tags: ['周末游', '清单', '省心'],
+          avatarBg: 'linear-gradient(135deg, rgba(59,130,246,.55), rgba(139,92,246,.55))'
+        },
+        {
+          id: 't3',
+          name: 'Lina',
+          initials: 'LN',
+          meta: '杭州 · 亲子出行',
+          rating: 4,
+          quote: '路线节奏安排得比较舒服，孩子不太累；没有 AI Key 也能用模板先跑通流程。',
+          tags: ['亲子', '节奏', '模板兜底'],
+          avatarBg: 'linear-gradient(135deg, rgba(245,158,11,.55), rgba(16,185,129,.55))'
+        }
+      ],
+
+      // demo + planner
+      demoLoading: true,
+      demoItinerary: null,
+      plannerOpen: false,
+      plannerItinerary: null,
+      plannerError: ''
     }
   },
   mounted() {
     const savedTheme = localStorage.getItem('theme')
     this.isDark = savedTheme ? savedTheme === 'dark' : false
     this.applyTheme()
+    this.loadDemo()
   },
   methods: {
     toggleTheme() {
@@ -239,24 +607,104 @@ export default {
       else if (!/^\d+(-\d+)?(\+)?$/.test(this.form.budget.replace(/,/g, ''))) { this.errors.budget = '格式如: 5000-8000'; isValid = false }
       return isValid
     },
+    applyExample(ex) {
+      if (!ex || !ex.payload) return
+      this.form = { ...this.form, ...ex.payload }
+      // bring the form into view for mobile users
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }) } catch (_) {}
+    },
+    openPlanner() {
+      this.plannerOpen = true
+      this.plannerError = ''
+    },
+    closePlanner() {
+      this.plannerOpen = false
+      this.plannerError = ''
+    },
+    openPlannerWithDemo() {
+      this.openPlanner()
+      if (!this.aiPrompt.trim()) this.useDemoPrompt()
+      if (!this.plannerItinerary && this.demoItinerary) this.plannerItinerary = this.demoItinerary
+    },
+    useDemoPrompt() {
+      this.aiPrompt = '帮我规划 5 天东京自由行，预算适中，喜欢美食和二次元'
+    },
+    parsePromptToPayload(prompt) {
+      const text = (prompt || '').trim()
+      const payload = { ...this.form }
+
+      // days: "5天"
+      const daysMatch = text.match(/(\d+)\s*天/)
+      if (daysMatch) payload.days = Math.min(30, Math.max(1, parseInt(daysMatch[1], 10)))
+
+      // start: "从上海出发"
+      const startMatch = text.match(/从([^，,。\s]{1,10})出发/)
+      if (startMatch) payload.start = startMatch[1]
+
+      // destination (prefer explicit patterns to avoid误抓“天东京”):
+      // 1) "5天东京..." / "5 天 东京..."
+      const dayCityMatch = text.match(/(\d+)\s*天\s*([^\s，,。]{2,12})/)
+      // 2) "去东京" / "到东京" / "前往东京" / "去东京玩"
+      const verbCityMatch =
+        text.match(/(?:前往|去|到|到达|飞往|玩|游玩)([^，,。\s]{2,12})/)
+
+      const destCandidate = (dayCityMatch && dayCityMatch[2]) || (verbCityMatch && verbCityMatch[1])
+      if (destCandidate) payload.dest = destCandidate.replace(/^天/, '').trim()
+
+      // budget hints
+      if (/预算适中/.test(text)) payload.budget = payload.budget || '8000-12000'
+      const budgetMatch = text.match(/预算[^0-9]*(\d+(?:-\d+)?\+?)/)
+      if (budgetMatch) payload.budget = budgetMatch[1]
+
+      return payload
+    },
+    async sendPrompt() {
+      if (!this.aiPrompt.trim()) return
+      this.openPlanner()
+      const payload = this.parsePromptToPayload(this.aiPrompt)
+      this.plannerError = ''
+      this.plannerItinerary = null
+      try {
+        this.loading = true
+        const res = await axios.post('/api/plan', {
+          start: payload.start,
+          dest: payload.dest,
+          days: parseInt(payload.days),
+          budget: String(payload.budget)
+        })
+        this.plannerItinerary = res.data
+      } catch (e) {
+        console.error('生成行程失败:', e)
+        this.plannerError = '生成失败：请检查后端是否启动，或稍后重试（无 AI Key 也应有模板兜底）。'
+      } finally {
+        this.loading = false
+      }
+    },
+    applyItineraryToResult(data) {
+      if (!data) return
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+      this.$router.push({ name: 'Result', query: { d: encoded } })
+      this.closePlanner()
+    },
+    async loadDemo() {
+      try {
+        this.demoLoading = true
+        // fixed demo: 5 days Tokyo, mid budget
+        const res = await axios.post('/api/plan', { start: '上海', dest: '东京', days: 5, budget: '8000-12000' })
+        this.demoItinerary = res.data
+      } catch (e) {
+        console.error('加载示例行程失败:', e)
+        this.demoItinerary = null
+      } finally {
+        this.demoLoading = false
+      }
+    },
     startPlanning() {
       if (!this.validateForm()) return
-      this.loading = true
-      this.loadingProgress = 0
-      const interval = setInterval(() => {
-        this.loadingProgress += Math.random() * 15
-        if (this.loadingProgress >= 95) { this.loadingProgress = 95; clearInterval(interval) }
-      }, 300)
-      axios.post('/api/plan', {
-        start: this.form.start, dest: this.form.dest,
-        days: parseInt(this.form.days), budget: this.form.budget
-      }).then(response => {
-        clearInterval(interval); this.loadingProgress = 100
-        setTimeout(() => { this.loading = false; const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))); this.$router.push({ name: 'Result', query: { d: encoded } }) }, 500)
-      }).catch(error => {
-        clearInterval(interval); this.loading = false
-        console.error('生成行程失败:', error); alert('生成行程失败，请稍后重试')
-      })
+      // Instead of navigating immediately, open planner and show preview first
+      // Use a parse-friendly template: “去{dest}玩{days}天”
+      this.aiPrompt = this.aiPrompt.trim() || `从${this.form.start}出发，去${this.form.dest}玩${this.form.days}天，预算${this.form.budget}`
+      this.sendPrompt()
     }
   }
 }
@@ -294,9 +742,11 @@ html.dark-mode {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
   display: flex; align-items: center; justify-content: space-between;
   padding: 1rem 2rem;
-  background: var(--bg-nav); backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 4px 20px var(--shadow-color);
+  /* Home hero is dark → use dark glass nav for cohesion */
+  background: rgba(2, 6, 23, 0.40);
+  backdrop-filter: blur(22px) saturate(1.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 40px rgba(2, 6, 23, 0.25);
 }
 .nav-brand { display: flex; align-items: center; gap: 0.75rem; }
 .brand-icon {
@@ -308,14 +758,25 @@ html.dark-mode {
 .icon-svg { width: 24px; height: 24px; color: white; }
 .brand-text-link { text-decoration: none; }
 .brand-text { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; }
+.nav-bar .brand-text { color: rgba(255, 255, 255, 0.92); }
 .brand-highlight { background: linear-gradient(135deg, #10B981, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.brand-slogan {
+  margin-left: 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(226, 232, 240, 0.78);
+  font-size: 0.85rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
 
 .nav-links { display: flex; gap: 2rem; }
 .nav-link {
-  font-size: 0.95rem; font-weight: 500; color: var(--text-secondary);
+  font-size: 0.95rem; font-weight: 600; color: rgba(226, 232, 240, 0.80);
   text-decoration: none; transition: color 0.3s; position: relative;
 }
-.nav-link:hover, .nav-link.router-link-exact-active { color: var(--primary-color); }
+.nav-link:hover, .nav-link.router-link-exact-active { color: rgba(167, 243, 208, 0.95); }
 .nav-link::after {
   content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
   background: linear-gradient(90deg, #10B981, #3B82F6); transition: width 0.3s;
@@ -324,8 +785,8 @@ html.dark-mode {
 
 .nav-actions { display: flex; gap: 0.75rem; }
 .btn { padding: 0.6rem 1.25rem; border-radius: 9999px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; border: none; }
-.btn-outline { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-primary); }
-.btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); background: rgba(16, 185, 129, 0.1); }
+.btn-outline { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.16); color: rgba(226, 232, 240, 0.88); }
+.btn-outline:hover { border-color: rgba(167, 243, 208, 0.55); color: rgba(167, 243, 208, 0.95); background: rgba(16, 185, 129, 0.10); }
 .theme-toggle { padding: 0.6rem; min-width: auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .theme-toggle svg { width: 20px; height: 20px; }
 .btn-primary { background: linear-gradient(135deg, #10B981, #059669); color: white; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
@@ -337,30 +798,128 @@ html.dark-mode {
   justify-content: center; padding-top: 80px; overflow: hidden;
 }
 .hero-bg { position: absolute; inset: 0; z-index: 0; }
+.hero-media {
+  position: absolute;
+  inset: -4%;
+  z-index: 0;
+  /* High-tech sailboat hero (pure CSS + inline SVG). */
+  background:
+    radial-gradient(circle at 18% 18%, rgba(16, 185, 129, 0.30), transparent 58%),
+    radial-gradient(circle at 82% 20%, rgba(59, 130, 246, 0.30), transparent 56%),
+    radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.22), transparent 60%),
+    linear-gradient(180deg, #030712 0%, #07162e 35%, #020617 100%);
+  filter: saturate(1.08) contrast(1.08);
+  transform: translate3d(0, 0, 0) scale(1.03);
+  will-change: transform;
+  animation: heroFloat 18s ease-in-out infinite;
+}
+.hero-media::before {
+  /* Star trails layer */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 25% 35%, rgba(255,255,255,0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 30%, rgba(255,255,255,0.65) 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 55%, rgba(255,255,255,0.55) 0 1px, transparent 2px),
+    repeating-linear-gradient(110deg,
+      rgba(255,255,255,0.00) 0px,
+      rgba(255,255,255,0.00) 46px,
+      rgba(147, 197, 253, 0.10) 47px,
+      rgba(147, 197, 253, 0.00) 52px);
+  opacity: 0.45;
+  mix-blend-mode: screen;
+  transform: translate3d(-4%, -2%, 0);
+  animation: starDrift 22s linear infinite;
+  pointer-events: none;
+}
+.hero-media::after {
+  /* City-light reflections layer + readability (no sailboat) */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    /* city light reflections on water */
+    repeating-linear-gradient(90deg,
+      rgba(16,185,129,0.00) 0px,
+      rgba(16,185,129,0.00) 28px,
+      rgba(16,185,129,0.08) 30px,
+      rgba(59,130,246,0.00) 46px),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.40) 0%, rgba(2, 6, 23, 0.18) 42%, rgba(2, 6, 23, 0.72) 100%),
+    radial-gradient(circle at 50% 36%, rgba(2, 6, 23, 0.25), transparent 60%);
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-size: 160% 70%, 100% 100%, 100% 100%;
+  background-position: 50% 78%, 50% 0%, 50% 0%;
+  animation: reflectionSweep 10s ease-in-out infinite;
+  pointer-events: none;
+}
 .hero-gradient {
-  width: 100%; height: 100%;
-  background: linear-gradient(135deg, #ecfdf5 0%, #dbeafe 30%, #ede9fe 60%, #fce7f3 100%);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.35) 0%, rgba(219, 234, 254, 0.25) 30%, rgba(237, 233, 254, 0.22) 60%, rgba(252, 231, 243, 0.18) 100%);
+  mix-blend-mode: overlay;
 }
 html.dark-mode .hero-gradient {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(30, 41, 59, 0.45) 50%, rgba(51, 65, 85, 0.35) 100%);
+  mix-blend-mode: normal;
 }
 .hero-content { position: relative; z-index: 10; text-align: center; max-width: 900px; padding: 0 2rem; }
 .hero-title {
-  font-size: clamp(3.5rem, 8vw, 5.5rem); font-weight: 700; color: #1e293b;
+  font-size: clamp(3.5rem, 8vw, 5.5rem);
+  font-weight: 760;
+  color: rgba(255, 255, 255, 0.92);
   margin-bottom: 1.5rem; letter-spacing: -1.5px; font-family: 'Georgia', serif; line-height: 1.1;
+  text-shadow:
+    0 10px 40px rgba(2, 6, 23, 0.55),
+    0 0 22px rgba(59, 130, 246, 0.18),
+    0 0 18px rgba(16, 185, 129, 0.16);
 }
 html.dark-mode .hero-title { color: #fff; text-shadow: 0 4px 12px rgba(0,0,0,0.7); }
-.gradient-text { background: linear-gradient(135deg, #10B981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gradient-text { background: linear-gradient(135deg, #a7f3d0, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 html.dark-mode .gradient-text { background: linear-gradient(135deg, #6ee7b7, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.hero-subtitle { font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; color: #10B981; margin-bottom: 3rem; opacity: 0.9; font-family: 'Georgia', serif; }
-html.dark-mode .hero-subtitle { color: #a7f3d0; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+.hero-subtitle {
+  font-size: clamp(1.1rem, 2.4vw, 1.45rem);
+  font-weight: 650;
+  color: rgba(226, 232, 240, 0.86);
+  margin-bottom: 3rem;
+  opacity: 0.95;
+  font-family: 'Georgia', serif;
+  text-shadow: 0 8px 26px rgba(2, 6, 23, 0.55);
+}
+html.dark-mode .hero-subtitle { color: rgba(255, 255, 255, 0.90); text-shadow: 0 4px 18px rgba(0,0,0,0.75); }
+
+@keyframes heroFloat {
+  0% { transform: translate3d(-1.5%, -1%, 0) scale(1.04); }
+  50% { transform: translate3d(1.5%, 1%, 0) scale(1.08); }
+  100% { transform: translate3d(-1.5%, -1%, 0) scale(1.04); }
+}
+@keyframes starDrift {
+  0% { transform: translate3d(-6%, -4%, 0); opacity: 0.55; }
+  50% { transform: translate3d(6%, 2%, 0); opacity: 0.70; }
+  100% { transform: translate3d(-6%, -4%, 0); opacity: 0.55; }
+}
+@keyframes reflectionSweep {
+  0% { background-position: 40% 78%, 50% 0%, 50% 0%; filter: brightness(1.00); }
+  50% { background-position: 60% 78%, 50% 0%, 50% 0%; filter: brightness(1.06); }
+  100% { background-position: 40% 78%, 50% 0%, 50% 0%; filter: brightness(1.00); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-media { animation: none; transform: none; }
+  .hero-media::before, .hero-media::after { animation: none; }
+}
 
 /* 表单 */
 .search-card {
   padding: 1.5rem 2rem; border-radius: 2rem; max-width: 850px; margin: 0 auto;
-  background: var(--bg-card); backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color); box-shadow: 0 8px 32px var(--shadow-color);
+  background: rgba(2, 6, 23, 0.45);
+  backdrop-filter: blur(22px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 58px rgba(2, 6, 23, 0.35);
 }
+.hero-section .field-label { color: rgba(226, 232, 240, 0.78); }
+.hero-section .field-input { color: rgba(255, 255, 255, 0.92); text-shadow: none; }
+.hero-section .field-input::placeholder { color: rgba(226, 232, 240, 0.55); }
 .search-fields { display: flex; align-items: stretch; gap: 0; margin-bottom: 1.25rem; }
 .field-group { flex: 1; padding: 0 1rem; text-align: left; }
 .field-group:first-child { padding-left: 0; }
@@ -375,6 +934,7 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
 .field-input.error { border-bottom: 2px solid #ef4444; }
 .error-message { font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem; text-align: left; }
 .field-divider { width: 1px; background: linear-gradient(to bottom, transparent, var(--border-color), transparent); align-self: stretch; }
+.hero-section .field-divider { background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.18), transparent); }
 .search-btn {
   width: 100%; padding: 1rem 2rem;
   background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; border-radius: 9999px;
@@ -387,15 +947,210 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
 .btn-icon.rotating { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+.quick-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  justify-content: center;
+}
+.example-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: 100%;
+  padding: 0.55rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 6, 23, 0.28);
+  backdrop-filter: blur(16px) saturate(1.1);
+  color: rgba(226, 232, 240, 0.86);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 14px 45px rgba(2, 6, 23, 0.25);
+  text-align: left;
+}
+.example-chip:hover { transform: translateY(-2px) scale(1.01); background: rgba(2, 6, 23, 0.34); box-shadow: 0 18px 55px rgba(2, 6, 23, 0.30); }
+.example-chip:active { transform: translateY(0px) scale(0.99); }
+.chip-ai {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(59, 130, 246, 0.18));
+  color: rgba(167, 243, 208, 0.95);
+}
+.chip-ai svg { width: 16px; height: 16px; }
+.chip-text {
+  font-size: 0.85rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* keep same in dark-mode (already dark glass) */
+
+/* AI entry */
+.ai-entry {
+  margin: 1.2rem auto 0;
+  max-width: 850px;
+  text-align: left;
+}
+.ai-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.55rem;
+}
+.ai-entry-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 750;
+  text-shadow: 0 4px 18px rgba(2, 6, 23, 0.55);
+}
+.ai-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(12px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+.ai-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #a7f3d0, #10B981);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+.ai-entry-cta {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.90);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ai-entry-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.9rem;
+  padding: 1rem 1rem 1rem 1.1rem;
+  border-radius: 1.6rem;
+  background: rgba(2, 6, 23, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(20px) saturate(1.12);
+  box-shadow: 0 18px 60px rgba(2, 6, 23, 0.14);
+}
+.ai-textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.ai-textarea::placeholder { color: rgba(226, 232, 240, 0.55); }
+.ai-send {
+  align-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 800;
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.32);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.ai-send svg { width: 18px; height: 18px; }
+.ai-send:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 18px 55px rgba(16, 185, 129, 0.40); }
+.ai-send:disabled { opacity: 0.6; cursor: not-allowed; }
+.ai-entry-hint { margin-top: 0.55rem; color: rgba(255, 255, 255, 0.82); font-size: 0.88rem; text-shadow: 0 4px 18px rgba(2, 6, 23, 0.55); }
+/* same for dark-mode */
+
 /* 功能卡片 */
 .features-section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
-.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+.features-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
 .feature-card {
-  padding: 2.5rem; border-radius: 1.5rem; text-align: left; text-decoration: none; color: inherit;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 1.5rem; text-align: left; text-decoration: none; color: inherit;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 18px 55px rgba(2, 6, 23, 0.10);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-.feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px var(--shadow-color); }
+.feature-card:hover { transform: translateY(-8px) scale(1.015); box-shadow: 0 26px 70px rgba(2, 6, 23, 0.16); }
+.feature-card:active { transform: translateY(-2px) scale(1.005); }
+.feature-card--image .feature-body { padding: 1.65rem 1.8rem 2rem; }
+.feature-media { position: relative; height: 190px; }
+.media-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.03);
+  transition: transform 0.4s ease;
+}
+.feature-card:hover .media-img { transform: scale(1.10); }
+.media-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(2, 6, 23, 0.05) 0%, rgba(2, 6, 23, 0.35) 75%, rgba(2, 6, 23, 0.55) 100%);
+}
+.media-img--inspiration {
+  background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=70");
+}
+.media-img--guide {
+  background-image: url("https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1600&q=70");
+}
+.media-img--community {
+  background-image: url("https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1600&q=70");
+}
+.ai-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.92);
+}
+.ai-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #a7f3d0, #10B981);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.20);
+}
+.ai-badge--blue .ai-dot { background: radial-gradient(circle at 30% 30%, #bfdbfe, #3B82F6); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.20); }
+.ai-badge--purple .ai-dot { background: radial-gradient(circle at 30% 30%, #ddd6fe, #8B5CF6); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.20); }
+.ai-text { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; }
+
+.feature-body { display: flex; flex-direction: column; gap: 0.9rem; }
+.feature-top { display: flex; align-items: center; gap: 0.75rem; }
 .feature-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
 .feature-icon svg { width: 28px; height: 28px; color: white; }
 .bg-emerald-light { background: linear-gradient(135deg, var(--primary-color), #34D399); }
@@ -404,6 +1159,277 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
 .feature-title { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem; }
 .feature-desc { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; }
 .feature-btn-text { color: var(--primary-color); font-weight: 600; font-size: 0.9rem; }
+html.dark-mode .feature-card {
+  background: rgba(15, 23, 42, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.40);
+}
+html.dark-mode .media-overlay {
+  background: linear-gradient(180deg, rgba(2, 6, 23, 0.10) 0%, rgba(2, 6, 23, 0.55) 75%, rgba(2, 6, 23, 0.72) 100%);
+}
+
+/* Social proof */
+.social-proof {
+  padding: 2.5rem 2rem 6rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.social-proof-inner {
+  border-radius: 2rem;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(22px) saturate(1.15);
+  box-shadow: 0 26px 85px rgba(2, 6, 23, 0.10);
+}
+html.dark-mode .social-proof-inner {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+}
+.proof-header { text-align: left; margin-bottom: 1.5rem; }
+.proof-title { font-size: 1.9rem; margin: 0 0 0.35rem; color: var(--text-primary); }
+.proof-subtitle { margin: 0; color: var(--text-secondary); font-size: 0.98rem; }
+
+.trust-badges {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 14px 40px rgba(2, 6, 23, 0.08);
+}
+html.dark-mode .trust-badge {
+  background: rgba(2, 6, 23, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+}
+.badge-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.96);
+  flex: 0 0 auto;
+}
+.badge-icon svg { width: 22px; height: 22px; }
+.badge-icon--lock { background: linear-gradient(135deg, rgba(16,185,129,.95), rgba(5,150,105,.95)); }
+.badge-icon--bolt { background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(37,99,235,.95)); }
+.badge-icon--spark { background: linear-gradient(135deg, rgba(139,92,246,.95), rgba(99,102,241,.95)); }
+.badge-title { font-weight: 800; color: var(--text-primary); font-size: 0.98rem; }
+.badge-desc { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.15rem; }
+
+.testimonials {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+.testimonial-card {
+  padding: 1.2rem 1.2rem 1.1rem;
+  border-radius: 1.4rem;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 16px 55px rgba(2, 6, 23, 0.10);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.testimonial-card:hover { transform: translateY(-6px); box-shadow: 0 24px 75px rgba(2, 6, 23, 0.14); }
+html.dark-mode .testimonial-card {
+  background: rgba(2, 6, 23, 0.20);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 22px 78px rgba(0, 0, 0, 0.42);
+}
+.t-top { display: flex; align-items: center; gap: 0.85rem; }
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.18);
+}
+.avatar-text { font-weight: 900; letter-spacing: 0.02em; }
+.t-meta { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.t-name { font-weight: 850; color: var(--text-primary); }
+.t-sub { font-size: 0.85rem; color: var(--text-secondary); }
+.t-rating { margin-left: auto; display: inline-flex; gap: 2px; }
+.star { font-size: 0.85rem; color: rgba(148, 163, 184, 0.7); }
+.star.on { color: #fbbf24; text-shadow: 0 6px 16px rgba(251,191,36,0.35); }
+.t-quote { margin: 0.9rem 0 0.85rem; color: var(--text-primary); line-height: 1.65; font-size: 0.95rem; }
+.t-tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.tag {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  color: rgba(16, 185, 129, 0.95);
+}
+html.dark-mode .tag {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: rgba(167, 243, 208, 0.95);
+}
+
+/* Demo */
+.demo-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+}
+.demo-inner {
+  border-radius: 2rem;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(22px) saturate(1.15);
+  box-shadow: 0 26px 85px rgba(2, 6, 23, 0.10);
+}
+html.dark-mode .demo-inner {
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+}
+.demo-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1rem; justify-content: space-between; }
+.demo-title { margin: 0; color: var(--text-primary); font-size: 1.9rem; }
+.demo-subtitle { margin: 0; color: var(--text-secondary); }
+.demo-open { border: none; background: transparent; cursor: pointer; color: var(--primary-color); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.demo-loading { margin-top: 1.4rem; color: var(--text-secondary); }
+.demo-grid { margin-top: 1.4rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.demo-card {
+  border-radius: 1.5rem;
+  padding: 1.2rem 1.25rem;
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 16px 55px rgba(2, 6, 23, 0.10);
+}
+html.dark-mode .demo-card { background: rgba(2, 6, 23, 0.20); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 22px 78px rgba(0, 0, 0, 0.42); }
+.demo-card--wide { grid-column: span 2; }
+.demo-kpi { display: flex; justify-content: space-between; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px solid rgba(148, 163, 184, 0.22); }
+.demo-kpi:last-child { border-bottom: none; }
+.kpi-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 750; }
+.kpi-value { color: var(--text-primary); font-size: 1.05rem; font-weight: 900; }
+.demo-list-title { font-weight: 900; color: var(--text-primary); margin-bottom: 0.7rem; }
+.demo-days { display: grid; gap: 0.65rem; }
+.demo-day { display: flex; align-items: center; gap: 0.75rem; }
+.day-badge { font-size: 0.78rem; font-weight: 900; color: rgba(16,185,129,0.95); background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.20); padding: 0.25rem 0.55rem; border-radius: 9999px; }
+.day-title { color: var(--text-primary); font-weight: 800; }
+.demo-budget { display: grid; gap: 0.45rem; }
+.budget-row { display: flex; justify-content: space-between; color: var(--text-primary); }
+.budget-cat { color: var(--text-secondary); font-weight: 750; }
+.budget-amt { font-weight: 900; }
+.demo-pack { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.demo-pack-item {
+  font-size: 0.82rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.10);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  color: rgba(99, 102, 241, 0.95);
+}
+html.dark-mode .demo-pack-item {
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  color: rgba(199, 210, 254, 0.92);
+}
+.demo-pack-hint { margin-top: 0.6rem; color: var(--text-secondary); font-size: 0.86rem; line-height: 1.4; }
+
+/* Drawer planner */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: flex-end;
+}
+.drawer {
+  width: min(560px, 92vw);
+  height: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(18px) saturate(1.1);
+  display: flex;
+  flex-direction: column;
+}
+html.dark-mode .drawer { background: rgba(2, 6, 23, 0.86); border-left: 1px solid rgba(255, 255, 255, 0.12); }
+.drawer-head {
+  padding: 1rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+.drawer-title { display: inline-flex; align-items: center; gap: 0.6rem; color: var(--text-primary); font-weight: 950; }
+.drawer-ai { font-weight: 900; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 9999px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.22); color: rgba(16,185,129,0.98); }
+.drawer-close { border: none; background: transparent; cursor: pointer; font-size: 1.2rem; color: var(--text-secondary); }
+.drawer-body { padding: 1rem 1.1rem 1.2rem; overflow: auto; }
+.drawer-input { border-radius: 1.4rem; padding: 0.9rem; background: rgba(255, 255, 255, 0.65); border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: 0 16px 55px rgba(2,6,23,0.10); }
+html.dark-mode .drawer-input { background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 22px 78px rgba(0,0,0,0.42); }
+.drawer-textarea { width: 100%; border: none; outline: none; resize: none; background: transparent; color: var(--text-primary); font-size: 1rem; line-height: 1.55; }
+.drawer-textarea::placeholder { color: var(--text-secondary); }
+.drawer-actions { display: flex; gap: 0.7rem; justify-content: flex-end; margin-top: 0.7rem; flex-wrap: wrap; }
+.drawer-btn { border: none; cursor: pointer; border-radius: 9999px; padding: 0.7rem 1rem; font-weight: 900; }
+.drawer-btn--primary { background: linear-gradient(135deg, #10B981, #059669); color: rgba(255,255,255,0.96); box-shadow: 0 14px 45px rgba(16,185,129,0.30); }
+.drawer-btn--secondary { background: rgba(148, 163, 184, 0.18); color: var(--text-primary); }
+html.dark-mode .drawer-btn--secondary { background: rgba(148, 163, 184, 0.14); }
+.drawer-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.drawer-error { margin-top: 0.9rem; padding: 0.9rem 1rem; border-radius: 1.2rem; background: rgba(239, 68, 68, 0.10); border: 1px solid rgba(239, 68, 68, 0.22); color: rgba(239, 68, 68, 0.95); font-weight: 750; }
+.drawer-empty { margin-top: 1.2rem; padding: 1.1rem 1rem; border-radius: 1.4rem; border: 1px dashed rgba(148, 163, 184, 0.35); color: var(--text-secondary); }
+.empty-title { font-weight: 950; color: var(--text-primary); margin-bottom: 0.3rem; }
+.empty-desc { line-height: 1.6; }
+.drawer-preview { margin-top: 1.1rem; }
+.preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.preview-card {
+  border-radius: 1.4rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 16px 55px rgba(2, 6, 23, 0.10);
+}
+html.dark-mode .preview-card { background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 22px 78px rgba(0,0,0,0.42); }
+.preview-card--wide { grid-column: span 2; }
+.preview-card--map { grid-column: span 2; }
+.preview-title { font-weight: 950; color: var(--text-primary); margin-bottom: 0.6rem; }
+.preview-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.kpi { border-radius: 1rem; padding: 0.7rem; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.16); }
+html.dark-mode .kpi { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.18); }
+.kpi-k { color: var(--text-secondary); font-weight: 800; font-size: 0.78rem; }
+.kpi-v { color: var(--text-primary); font-weight: 950; margin-top: 0.1rem; }
+.days { display: grid; gap: 0.55rem; }
+.day { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.7rem; border-radius: 1.1rem; background: rgba(148,163,184,0.10); border: 1px solid rgba(148,163,184,0.18); }
+.day-left { display: flex; align-items: center; gap: 0.65rem; }
+.day-chip { font-size: 0.78rem; font-weight: 950; color: rgba(59,130,246,0.95); background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.18); padding: 0.22rem 0.55rem; border-radius: 9999px; }
+.day-name { font-weight: 900; color: var(--text-primary); }
+.day-right { color: var(--text-secondary); font-weight: 750; font-size: 0.86rem; }
+.packing { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.pack-item { font-size: 0.82rem; padding: 0.25rem 0.55rem; border-radius: 9999px; background: rgba(99,102,241,0.10); border: 1px solid rgba(99,102,241,0.18); color: rgba(99,102,241,0.95); }
+html.dark-mode .pack-item { background: rgba(99,102,241,0.14); border: 1px solid rgba(99,102,241,0.22); color: rgba(199,210,254,0.92); }
+.map-skeleton { height: 140px; border-radius: 1.2rem; background: linear-gradient(135deg, rgba(59,130,246,0.10), rgba(16,185,129,0.10)); border: 1px solid rgba(148,163,184,0.22); position: relative; overflow: hidden; }
+.map-pin { position: absolute; left: 18%; top: 40%; width: 14px; height: 14px; border-radius: 50%; background: rgba(16,185,129,0.95); box-shadow: 0 0 0 10px rgba(16,185,129,0.16); }
+.map-line { position: absolute; left: 24%; top: 44%; width: 55%; height: 10px; border-radius: 9999px; background: rgba(59,130,246,0.22); }
+.map-line--2 { top: 62%; width: 70%; left: 14%; background: rgba(99,102,241,0.18); }
+.map-hint { margin-top: 0.55rem; color: var(--text-secondary); font-size: 0.88rem; line-height: 1.4; }
+.drawer-footer { margin-top: 0.9rem; display: flex; justify-content: flex-end; }
+
+.drawer-enter-active, .drawer-leave-active { transition: opacity 0.2s ease; }
+.drawer-enter-from, .drawer-leave-to { opacity: 0; }
+.drawer-enter-active .drawer, .drawer-leave-active .drawer { transition: transform 0.25s ease; }
+.drawer-enter-from .drawer { transform: translateX(24px); }
+.drawer-leave-to .drawer { transform: translateX(24px); }
 
 /* 加载 */
 .loading-overlay {
@@ -430,10 +1456,6 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
 .footer-brand { display: flex; flex-direction: column; gap: 1rem; }
 .brand-header { display: flex; align-items: center; gap: 1rem; }
 .brand-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; max-width: 300px; }
-.social-links { display: flex; gap: 1rem; margin-top: 0.5rem; }
-.social-link { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); text-decoration: none; transition: all 0.3s; box-shadow: 0 2px 8px var(--shadow-color); }
-.social-link:hover { transform: translateY(-4px); color: var(--primary-color); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-.social-link svg { width: 20px; height: 20px; }
 .footer-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; }
 .link-group { display: flex; flex-direction: column; gap: 1rem; }
 .link-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
@@ -456,8 +1478,25 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
   .field-divider { display: none; }
   .field-group { padding: 0; }
   .features-section { padding: 4rem 1rem; }
+  .features-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+  .feature-media { height: 170px; }
+  .ai-entry { margin-top: 1rem; }
+  .ai-entry-box { grid-template-columns: 1fr; }
+  .ai-send { width: 100%; justify-content: center; }
+  .social-proof { padding: 1.75rem 1rem 4rem; }
+  .social-proof-inner { padding: 1.5rem; }
+  .trust-badges { grid-template-columns: 1fr; }
+  .testimonials { grid-template-columns: 1fr; }
+  .demo-section { padding: 0 1rem 4rem; }
+  .demo-inner { padding: 1.5rem; }
+  .demo-grid { grid-template-columns: 1fr; }
+  .demo-card--wide { grid-column: span 1; }
+  .drawer { width: 100vw; }
+  .preview-grid { grid-template-columns: 1fr; }
+  .preview-card--wide, .preview-card--map { grid-column: span 1; }
   .footer-content { grid-template-columns: 1fr; gap: 2rem; }
   .footer-links { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .chip-text { white-space: normal; }
 }
 .hamburger { display: none; flex-direction: column; gap: 5px; padding: 0.5rem; cursor: pointer; background: none; border: none; }
 .hamburger span { display: block; width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: all 0.3s; }

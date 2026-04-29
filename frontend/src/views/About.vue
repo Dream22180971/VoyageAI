@@ -4,6 +4,7 @@
       <div class="nav-brand">
         <div class="brand-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/></svg></div>
         <router-link to="/" class="brand-text-link"><span class="brand-text">Voyage<span class="brand-highlight">AI</span></span></router-link>
+        <span class="brand-slogan hide-mobile">发现未知，规划所爱</span>
       </div>
       <div class="nav-links">
         <router-link to="/" class="nav-link">首页</router-link>
@@ -48,6 +49,10 @@
         <h2 class="section-title">🚀 项目简介</h2>
         <p class="section-text">VoyageAI 是一款基于人工智能的智能旅行规划系统。只需输入出发地、目的地、旅行天数和预算，AI 便会为你生成一份个性化的行程方案——涵盖每日活动安排、预算分析、天气预警以及行前准备清单。</p>
         <p class="section-text">我们致力于让旅行规划变得简单、高效且充满惊喜，无论你是背包客、家庭出游还是商务旅行，VoyageAI 都能为你量身定制最适合的行程。</p>
+        <p class="section-text">
+          <strong>项目开源地址：</strong>
+          <a class="repo-link" href="https://github.com/Dream22180971/VoyageAI" target="_blank" rel="noreferrer">GitHub - Dream22180971/VoyageAI</a>
+        </p>
       </div>
     </section>
 
@@ -158,22 +163,24 @@ html.dark-mode { --bg-primary:#020617;--bg-secondary:#0f172a;--bg-nav:rgba(15,23
 .page-container { min-height:100vh; background:var(--bg-primary); }
 
 /* 导航栏 */
-.nav-bar { position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:var(--bg-nav);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-color);box-shadow:0 4px 20px var(--shadow-color); }
+.nav-bar { position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:rgba(2,6,23,0.40);backdrop-filter:blur(22px) saturate(1.15);border-bottom:1px solid rgba(255,255,255,0.12);box-shadow:0 10px 40px rgba(2,6,23,0.25); }
 .nav-brand { display:flex;align-items:center;gap:0.75rem; }
 .brand-icon { width:40px;height:40px;background:linear-gradient(135deg,#10B981,#059669);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(16,185,129,0.3); }
 .icon-svg { width:24px;height:24px;color:white; }
 .brand-text-link { text-decoration:none; }
 .brand-text { font-size:1.5rem;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px; }
+.nav-bar .brand-text { color:rgba(255,255,255,0.92); }
+.brand-slogan { margin-left:0.75rem;padding-left:0.75rem;border-left:1px solid rgba(255,255,255,0.14);color:rgba(226,232,240,0.78);font-size:0.85rem;font-weight:650;letter-spacing:0.02em;white-space:nowrap; }
 .brand-highlight { background:linear-gradient(135deg,#10B981,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
 .nav-links { display:flex;gap:2rem; }
-.nav-link { font-size:0.95rem;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color 0.3s;position:relative; }
-.nav-link:hover,.nav-link.router-link-exact-active { color:var(--primary-color); }
+.nav-link { font-size:0.95rem;font-weight:600;color:rgba(226,232,240,0.80);text-decoration:none;transition:color 0.3s;position:relative; }
+.nav-link:hover,.nav-link.router-link-exact-active { color:rgba(167,243,208,0.95); }
 .nav-link::after { content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:linear-gradient(90deg,#10B981,#3B82F6);transition:width 0.3s; }
 .nav-link:hover::after,.nav-link.router-link-exact-active::after { width:100%; }
 .nav-actions { display:flex;gap:0.75rem; }
 .btn { padding:0.6rem 1.25rem;border-radius:9999px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.3s;border:none; }
-.btn-outline { background:transparent;border:1.5px solid var(--border-color);color:var(--text-primary); }
-.btn-outline:hover { border-color:var(--primary-color);color:var(--primary-color); }
+.btn-outline { background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.16);color:rgba(226,232,240,0.88); }
+.btn-outline:hover { border-color:rgba(167,243,208,0.55);color:rgba(167,243,208,0.95); }
 .theme-toggle { padding:0.6rem;min-width:auto;border-radius:50%;display:flex;align-items:center;justify-content:center; }
 .theme-toggle svg { width:20px;height:20px; }
 .btn-primary { background:linear-gradient(135deg,#10B981,#059669);color:white;box-shadow:0 4px 14px rgba(16,185,129,0.35); }
@@ -181,15 +188,15 @@ html.dark-mode { --bg-primary:#020617;--bg-secondary:#0f172a;--bg-nav:rgba(15,23
 
 /* Hero */
 .page-hero { position:relative;padding:9rem 2rem 4rem;text-align:center;overflow:hidden; }
-.hero-gradient { position:absolute;inset:0;background:linear-gradient(135deg,#ecfdf5 0%,#dbeafe 30%,#ede9fe 60%,#fce7f3 100%); }
-html.dark-mode .hero-gradient { background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#334155 100%); }
+.hero-gradient { position:absolute;inset:0;background:radial-gradient(circle at 20% 18%, rgba(16,185,129,0.30), transparent 58%),radial-gradient(circle at 82% 22%, rgba(59,130,246,0.28), transparent 56%),linear-gradient(180deg,#030712 0%,#07162e 35%,#020617 100%); }
+html.dark-mode .hero-gradient { background:radial-gradient(circle at 20% 18%, rgba(16,185,129,0.30), transparent 58%),radial-gradient(circle at 82% 22%, rgba(59,130,246,0.28), transparent 56%),linear-gradient(180deg,#030712 0%,#07162e 35%,#020617 100%); }
 .hero-content { position:relative;z-index:10; }
-.page-title { font-size:clamp(2.5rem,5vw,3.5rem);font-weight:700;color:#1e293b;margin-bottom:1rem;font-family:'Georgia',serif; }
-html.dark-mode .page-title { color:#fff; }
+.page-title { font-size:clamp(2.5rem,5vw,3.5rem);font-weight:760;color:rgba(255,255,255,0.92);margin-bottom:1rem;font-family:'Georgia',serif;text-shadow:0 10px 40px rgba(2,6,23,0.55),0 0 18px rgba(59,130,246,0.16),0 0 16px rgba(16,185,129,0.14); }
+html.dark-mode .page-title { color:rgba(255,255,255,0.92); }
 .gradient-text { background:linear-gradient(135deg,#10B981,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
 html.dark-mode .gradient-text { background:linear-gradient(135deg,#6ee7b7,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
-.page-subtitle { font-size:1.15rem;color:#64748b;max-width:600px;margin:0 auto; }
-html.dark-mode .page-subtitle { color:#94a3b8; }
+.page-subtitle { font-size:1.15rem;color:rgba(226,232,240,0.82);max-width:600px;margin:0 auto;text-shadow:0 8px 26px rgba(2,6,23,0.55); }
+html.dark-mode .page-subtitle { color:rgba(226,232,240,0.82); }
 
 /* 内容区 */
 .content-section { padding:4rem 2rem; }
@@ -197,6 +204,8 @@ html.dark-mode .page-subtitle { color:#94a3b8; }
 .section-inner { max-width:1000px;margin:0 auto; }
 .section-title { font-size:1.6rem;font-weight:700;color:var(--text-primary);text-align:center;margin-bottom:2rem; }
 .section-text { font-size:1rem;color:var(--text-secondary);line-height:1.8;text-align:center;max-width:700px;margin:0 auto 1.2rem; }
+.repo-link { color: rgba(167,243,208,0.95); text-decoration: underline; text-underline-offset: 3px; }
+.repo-link:hover { color: rgba(191,219,254,0.95); }
 
 /* 功能卡片 */
 .features-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem; }
@@ -244,7 +253,7 @@ html.dark-mode .page-subtitle { color:#94a3b8; }
 }
 
 .hamburger{display:none;flex-direction:column;gap:5px;padding:0.5rem;cursor:pointer;background:none;border:none;}
-.hamburger span{display:block;width:22px;height:2px;background:var(--text-primary);border-radius:2px;transition:all 0.3s;}
+.hamburger span{display:block;width:22px;height:2px;background:rgba(226,232,240,0.85);border-radius:2px;transition:all 0.3s;}
 .hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
 .hamburger.active span:nth-child(2){opacity:0;}
 .hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
