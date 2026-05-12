@@ -14,6 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from database import engine, get_db
 from models import Base, Itinerary, User
 from config import settings
+from cache import init_cache, get_cache
 import logging
 import traceback
 
@@ -33,14 +34,20 @@ app = FastAPI(
 # 创建数据库表
 Base.metadata.create_all(bind=engine)
 
+# 初始化缓存
+cache = init_cache(ttl=settings.cache_timeout)
+
 # 配置CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # 前端开发服务器
+        "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:8080",
-        "http://127.0.0.1:8080"
+        "http://127.0.0.1:8080",
+        "http://47.103.214.75",
+        "https://47.103.214.75",
+        "http://localhost",
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -74,7 +81,15 @@ async def get_city_adcode(city: str, client: httpx.AsyncClient) -> str:
         return None
 
 async def get_weather_data(city: str) -> dict:
-    """调用高德地图API获取实时天气"""
+    """调用高德地图API获取实时天气（带缓存）"""
+    c = get_cache()
+    cache_key = f"weather:{city.strip()}"
+    if c:
+        cached = c.get(cache_key)
+        if cached is not None:
+            logger.info(f"天气缓存命中: {city}")
+            return cached
+
     # 创建客户端配置，添加重试机制
     async with httpx.AsyncClient(
         trust_env=False,
@@ -110,7 +125,7 @@ async def get_weather_data(city: str) -> dict:
                     if data.get("status") == "1" and data.get("lives"):
                         live_data = data["lives"][0]
                         logger.info(f"成功获取{city}的天气数据：{live_data['temperature']}°C, {live_data['weather']}")
-                        return {
+                        result = {
                             "city": live_data.get("city", city),
                             "temp": f"{live_data['temperature']}°C",
                             "condition": live_data["weather"],
@@ -119,6 +134,9 @@ async def get_weather_data(city: str) -> dict:
                             "wind_power": live_data.get("windpower", "N/A"),
                             "warning": get_weather_warning(live_data)
                         }
+                        if c:
+                            c.set(cache_key, result, ttl=600)  # 天气缓存10分钟
+                        return result
                     else:
                         logger.error(f"天气数据解析失败: {data}")
                         if attempt < 2:
@@ -244,12 +262,23 @@ def get_weather_warning(weather_data: dict) -> str:
     return " ".join(warnings) if warnings else "天气适宜出行。"
 
 async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> dict:
-    """调用 DeepSeek 生成结构化行程（包含预算约束）"""
-    
+    """调用 DeepSeek 生成结构化行程（包含预算约束，带缓存）"""
+    c = get_cache()
+    dest_norm = normalize_destination(dest)
+    cache_key = f"itin:{start.strip()}:{dest_norm}:{days}:{budget.strip()}"
+    if c:
+        cached = c.get(cache_key)
+        if cached is not None:
+            logger.info(f"行程缓存命中: {start} -> {dest_norm} ({days}天, {budget})")
+            return cached
+
     # 如果DeepSeek客户端未初始化，直接返回模拟数据
     if deepseek_client is None:
         print("DeepSeek客户端未初始化，使用模拟数据")
-        return build_realistic_mock_itinerary(start, dest, days, budget)
+        mock_result = build_realistic_mock_itinerary(start, dest, days, budget)
+        if c:
+            c.set(cache_key, mock_result, ttl=settings.cache_timeout)
+        return mock_result
     
     prompt = f"""
 你是一个专业的旅行规划师。请根据以下信息生成详细的行程规划：
@@ -326,7 +355,9 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
                 "provider": "DeepSeek",
                 "response_time": "N/A"
             }
-            
+
+            if c:
+                c.set(cache_key, result, ttl=settings.cache_timeout)
             return result
         else:
             print("警告：模型返回内容不包含有效 JSON")
@@ -334,8 +365,11 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
             
     except Exception as e:
         print(f"DeepSeek API 调用失败：{e}")
-        # 返回模拟数据
-        return build_realistic_mock_itinerary(start, dest, days, budget)
+        # 返回模拟数据（也缓存，避免重复计算）
+        mock_result = build_realistic_mock_itinerary(start, dest, days, budget)
+        if c:
+            c.set(cache_key, mock_result, ttl=settings.cache_timeout)
+        return mock_result
 
 # 目的地定制化数据库
 DESTINATION_DATA = {
@@ -825,22 +859,28 @@ async def root():
 @app.get("/api/health")
 async def health_check():
     """健康检查接口"""
+    c = get_cache()
     return {
         "status": "healthy",
         "service": "VoyageAI Travel Planner",
         "ai_provider": "DeepSeek",
         "weather_service": "OpenWeatherMap" if settings.openweather_api_key else "Disabled",
-        "cache_enabled": True
+        "cache_enabled": True,
+        "cache_entries": c.size if c else 0,
+        "cache_ttl": settings.cache_timeout,
     }
 
 @app.get("/api/config")
 async def get_config():
     """获取当前配置信息"""
+    c = get_cache()
     return {
         "ai_provider": "DeepSeek",
         "model": DEEPSEEK_MODEL,
         "weather_enabled": bool(settings.openweather_api_key and settings.openweather_api_key != "eaad9d3c97b90d588cffb2835dc80129"),
         "cache_enabled": True,
+        "cache_ttl": settings.cache_timeout,
+        "cache_entries": c.size if c else 0,
         "deepseek_key_set": bool(settings.deepseek_api_key and settings.deepseek_api_key != "your_deepseek_api_key_here")
     }
 
@@ -920,6 +960,75 @@ async def plan(request: PlanRequest, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"行程规划异常：{e}")
         raise HTTPException(status_code=500, detail={"error": "服务器内部错误", "details": str(e)})
+
+@app.get("/api/history")
+async def get_history(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    """获取历史行程列表"""
+    try:
+        itineraries = (
+            db.query(Itinerary)
+            .order_by(Itinerary.created_at.desc())
+            .offset(skip)
+            .limit(min(limit, 50))
+            .all()
+        )
+        total = db.query(Itinerary).count()
+        return {
+            "total": total,
+            "items": [
+                {
+                    "id": it.id,
+                    "start_location": it.start_location,
+                    "destination": it.destination,
+                    "days": it.days,
+                    "budget": it.budget,
+                    "created_at": it.created_at.isoformat() if it.created_at else None,
+                }
+                for it in itineraries
+            ],
+        }
+    except SQLAlchemyError as e:
+        logger.error(f"查询历史行程失败: {e}")
+        raise HTTPException(status_code=500, detail={"error": "数据库查询失败"})
+
+
+@app.get("/api/itinerary/{itinerary_id}")
+async def get_itinerary(itinerary_id: int, db: Session = Depends(get_db)):
+    """获取单个行程详情"""
+    try:
+        it = db.query(Itinerary).filter(Itinerary.id == itinerary_id).first()
+        if not it:
+            raise HTTPException(status_code=404, detail={"error": "行程不存在"})
+
+        def safe_json_parse(raw: str | None, default=None):
+            if raw is None:
+                return default
+            try:
+                return json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                return raw
+
+        return {
+            "id": it.id,
+            "start_location": it.start_location,
+            "destination": it.destination,
+            "days": it.days,
+            "budget": it.budget,
+            "overview": safe_json_parse(it.overview, {}),
+            "daily_plan": safe_json_parse(it.daily_plan, []),
+            "budget_breakdown": safe_json_parse(it.budget_breakdown, []),
+            "packing_list": safe_json_parse(it.packing_list, []),
+            "weather_alert": safe_json_parse(it.weather_alert),
+            "model_info": safe_json_parse(it.model_info),
+            "created_at": it.created_at.isoformat() if it.created_at else None,
+            "updated_at": it.updated_at.isoformat() if it.updated_at else None,
+        }
+    except HTTPException:
+        raise
+    except SQLAlchemyError as e:
+        logger.error(f"查询行程详情失败: {e}")
+        raise HTTPException(status_code=500, detail={"error": "数据库查询失败"})
+
 
 # 全局异常处理器
 @app.exception_handler(Exception)
