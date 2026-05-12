@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>AI 驱动的智能旅行规划，让每一次出发都充满期待</strong><br>
-  <a href="https://47.103.214.75">在线体验</a> · Vue 3 + FastAPI + DeepSeek
+  <a href="https://voyageai.seanwalter.top/">在线体验</a> · Vue 3 + FastAPI + DeepSeek
 </p>
 
 
@@ -11,9 +11,6 @@
 <img width="1910" height="908" alt="image" src="https://github.com/user-attachments/assets/a3ad3d10-7b1c-4bb8-b59b-30491cdfee87" />
 
 <img width="1910" height="912" alt="image" src="https://github.com/user-attachments/assets/7f9add7d-f668-4d1e-8c4e-183003332de5" />
-
-
-![Uploading image.png…]()
 
 ---
 
