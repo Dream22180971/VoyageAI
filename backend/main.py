@@ -125,6 +125,7 @@ async def get_weather_data(city: str) -> dict:
                     if data.get("status") == "1" and data.get("lives"):
                         live_data = data["lives"][0]
                         logger.info(f"成功获取{city}的天气数据：{live_data['temperature']}°C, {live_data['weather']}")
+                        advice_data = get_weather_advice(live_data)
                         result = {
                             "city": live_data.get("city", city),
                             "temp": f"{live_data['temperature']}°C",
@@ -132,7 +133,8 @@ async def get_weather_data(city: str) -> dict:
                             "humidity": live_data.get("humidity", "N/A"),
                             "wind_direction": live_data.get("winddirection", "N/A"),
                             "wind_power": live_data.get("windpower", "N/A"),
-                            "warning": get_weather_warning(live_data)
+                            "warning": advice_data["warning"],
+                            "advice": advice_data["advice"]
                         }
                         if c:
                             c.set(cache_key, result, ttl=600)  # 天气缓存10分钟
@@ -223,49 +225,75 @@ async def get_weather_data(city: str) -> dict:
                     "warning": "天气服务异常，当前显示模拟数据"
                 }
 
-def get_weather_warning(weather_data: dict) -> str:
-    """根据天气数据生成预警提示（适配高德地图数据格式）"""
+def get_weather_advice(weather_data: dict) -> dict:
+    """根据天气数据生成结构化出行建议（适配高德地图数据格式）"""
     warnings = []
-    
-    # 从高德地图数据中提取信息
+    advice_list = []
+
     temp = float(weather_data.get("temperature", 22))
     humidity = int(weather_data.get("humidity", 50))
     weather_desc = weather_data.get("weather", "").lower()
     wind_power = weather_data.get("windpower", "≤3")
-    
-    # 温度预警
-    if temp > 30:
+
+    # 温度
+    if temp > 35:
+        warnings.append("高温红色预警，注意防暑降温。")
+        advice_list.append({"icon": "☀️", "text": "极端高温，避开12-15点户外活动，多喝水，穿轻薄透气衣物"})
+    elif temp > 30:
         warnings.append("高温预警，注意防暑降温。")
+        advice_list.append({"icon": "☀️", "text": "天气炎热，携带防晒霜和遮阳帽，及时补充水分"})
     elif temp < 5:
         warnings.append("低温预警，注意保暖。")
-    
-    # 天气状况预警
-    if "雨" in weather_desc or "雪" in weather_desc:
-        warnings.append("降水天气，请携带雨具或保暖装备。")
+        advice_list.append({"icon": "🧥", "text": "气温较低，穿羽绒服或厚外套，注意手脚保暖"})
+    elif temp < 12:
+        advice_list.append({"icon": "🧥", "text": "偏凉，建议带薄外套或风衣"})
+    else:
+        advice_list.append({"icon": "👕", "text": "气温舒适，穿着轻薄透气即可"})
+
+    # 天气状况
+    if "雨" in weather_desc:
+        if "大" in weather_desc or "暴" in weather_desc:
+            warnings.append("暴雨预警，注意出行安全。")
+            advice_list.append({"icon": "🌧️", "text": "暴雨天气，携带雨伞雨衣，优先安排室内景点，注意防雷"})
+        else:
+            warnings.append("降水天气，请携带雨具。")
+            advice_list.append({"icon": "🌂", "text": "有降雨，随身带折叠伞，优先安排室内景点"})
+    elif "雪" in weather_desc:
+        warnings.append("降雪天气，注意保暖防滑。")
+        advice_list.append({"icon": "❄️", "text": "下雪天气，穿防滑鞋，注意路面结冰"})
     elif "晴" in weather_desc:
-        warnings.append("晴朗天气，紫外线较强，建议防晒。")
+        advice_list.append({"icon": "🧴", "text": "晴天紫外线较强，涂抹防晒霜，佩戴墨镜"})
     elif "雾" in weather_desc or "霾" in weather_desc:
         warnings.append("能见度较低，注意交通安全。")
-    
-    # 湿度预警
+        advice_list.append({"icon": "😷", "text": "雾霾天气，建议佩戴口罩，减少户外活动"})
+
+    # 湿度
     if humidity > 80:
         warnings.append("湿度较大，敏感人群请注意。")
-    
-    # 风力预警
+        advice_list.append({"icon": "💧", "text": "湿度较高，敏感人群携带常用药物，注意防潮"})
+
+    # 风力
     try:
-        wind_level = int(wind_power.replace("≤", ""))
+        wind_level = int(wind_power.replace("≤", "").replace("级", ""))
         if wind_level >= 6:
             warnings.append("风力较大，注意出行安全。")
+            advice_list.append({"icon": "💨", "text": "风力较大，避免海边/高空活动，固定随身物品"})
     except:
         pass
-    
-    return " ".join(warnings) if warnings else "天气适宜出行。"
 
-async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> dict:
+    return {
+        "warning": " ".join(warnings) if warnings else "天气适宜出行。",
+        "advice": advice_list if advice_list else [{"icon": "✅", "text": "天气状况良好，适合出行"}]
+    }
+
+async def generate_itinerary(start: str, dest: str, days: int, budget: str, preferences: list[str] = None, date: str = "", travelers: int = 1) -> dict:
     """调用 DeepSeek 生成结构化行程（包含预算约束，带缓存）"""
+    if preferences is None:
+        preferences = []
     c = get_cache()
     dest_norm = normalize_destination(dest)
-    cache_key = f"itin:{start.strip()}:{dest_norm}:{days}:{budget.strip()}"
+    prefs_hash = "|".join(sorted(preferences)) if preferences else "none"
+    cache_key = f"itin:{start.strip()}:{dest_norm}:{days}:{budget.strip()}:{date}:{travelers}:{prefs_hash}"
     if c:
         cached = c.get(cache_key)
         if cached is not None:
@@ -275,11 +303,14 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
     # 如果DeepSeek客户端未初始化，直接返回模拟数据
     if deepseek_client is None:
         print("DeepSeek客户端未初始化，使用模拟数据")
-        mock_result = build_realistic_mock_itinerary(start, dest, days, budget)
+        mock_result = build_realistic_mock_itinerary(start, dest, days, budget, preferences, date, travelers)
+        if mock_result.get("overview"):
+            mock_result["overview"]["travel_date"] = date
+            mock_result["overview"]["travelers"] = travelers
         if c:
             c.set(cache_key, mock_result, ttl=settings.cache_timeout)
         return mock_result
-    
+
     prompt = f"""
 你是一个专业的旅行规划师。请根据以下信息生成详细的行程规划：
 
@@ -287,8 +318,11 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
 - 目的地：{dest}
 - 游玩天数：{days}
 - 预算范围：{budget}人民币
+- 出发日期：{date if date else "未指定"}
+- 出行人数：{travelers}人
+- 旅行偏好：{", ".join(preferences) if preferences else "无特殊偏好"}
 
-请严格按照以下 JSON 格式返回，不要包含任何其他文字：
+{"请在行程安排中充分考虑以上偏好（如选择对应类型的餐厅、景点和活动），并根据出行人数合理安排住宿与交通，" if preferences else "请根据出行人数合理安排住宿与交通，"}请严格按照以下 JSON 格式返回，不要包含任何其他文字：
 {{
   "overview": {{
     "destination": "{dest}",
@@ -348,7 +382,12 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
         if json_start != -1 and json_end != -1:
             json_str = content[json_start:json_end]
             result = json.loads(json_str)
-            
+
+            # 注入用户输入的日期和人数到 overview（AI 不会返回这两个字段）
+            if result.get("overview"):
+                result["overview"]["travel_date"] = date
+                result["overview"]["travelers"] = travelers
+
             # 添加模型信息
             result["model_info"] = {
                 "model_used": DEEPSEEK_MODEL,
@@ -366,7 +405,10 @@ async def generate_itinerary(start: str, dest: str, days: int, budget: str) -> d
     except Exception as e:
         print(f"DeepSeek API 调用失败：{e}")
         # 返回模拟数据（也缓存，避免重复计算）
-        mock_result = build_realistic_mock_itinerary(start, dest, days, budget)
+        mock_result = build_realistic_mock_itinerary(start, dest, days, budget, preferences, date, travelers)
+        if mock_result.get("overview"):
+            mock_result["overview"]["travel_date"] = date
+            mock_result["overview"]["travelers"] = travelers
         if c:
             c.set(cache_key, mock_result, ttl=settings.cache_timeout)
         return mock_result
@@ -589,7 +631,7 @@ POI_DB = {
     },
 }
 
-def build_realistic_mock_itinerary(start: str, dest: str, days: int, budget: str) -> dict:
+def build_realistic_mock_itinerary(start: str, dest: str, days: int, budget: str, preferences: list[str] = None, date: str = "", travelers: int = 1) -> dict:
     """More realistic non-AI itinerary: concrete places, time blocks, and movement."""
     budget_num = parse_budget_to_number(budget)
     dest_norm = normalize_destination(dest)
@@ -891,6 +933,11 @@ async def get_weather(city: str):
     weather_data = await get_weather_data(city)
     return weather_data
 
+@app.get("/api/amap-config")
+async def get_amap_config():
+    """返回高德地图 JS API 配置（前端懒加载用）"""
+    return {"key": settings.amap_api_key, "version": "2.0"}
+
 from pydantic import BaseModel, Field
 
 class PlanRequest(BaseModel):
@@ -898,6 +945,9 @@ class PlanRequest(BaseModel):
     dest: str = Field(..., description="目的地")
     days: int = Field(..., ge=1, le=30, description="游玩天数")
     budget: str = Field(..., description="预算范围")
+    date: str = Field(default="", description="出发日期")
+    travelers: int = Field(default=1, ge=1, le=50, description="出行人数")
+    preferences: list[str] = Field(default=[], description="旅行偏好标签")
 
 @app.post("/api/plan")
 async def plan(request: PlanRequest, db: Session = Depends(get_db)):
@@ -923,7 +973,7 @@ async def plan(request: PlanRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=400, detail={"error": "输入验证失败", "details": errors})
         
         # 并行执行：同时调用 AI 和天气 API
-        itinerary_task = generate_itinerary(start, dest, days, budget)
+        itinerary_task = generate_itinerary(start, dest, days, budget, request.preferences, request.date, request.travelers)
         weather_task = get_weather_data(dest)
         
         itinerary, weather_data = await asyncio.gather(itinerary_task, weather_task)
@@ -938,6 +988,8 @@ async def plan(request: PlanRequest, db: Session = Depends(get_db)):
                 destination=dest,
                 days=days,
                 budget=budget,
+                travel_date=request.date or None,
+                travelers=request.travelers,
                 overview=json.dumps(itinerary.get("overview", {})),
                 daily_plan=json.dumps(itinerary.get("daily_plan", [])),
                 budget_breakdown=json.dumps(itinerary.get("budget_breakdown", [])),
@@ -961,6 +1013,59 @@ async def plan(request: PlanRequest, db: Session = Depends(get_db)):
         print(f"行程规划异常：{e}")
         raise HTTPException(status_code=500, detail={"error": "服务器内部错误", "details": str(e)})
 
+class ChatRequest(BaseModel):
+    previous_itinerary: dict = Field(..., description="之前的行程规划")
+    message: str = Field(..., description="修改请求，如'把第二天换成海边'")
+
+@app.post("/api/chat")
+async def chat(request: ChatRequest):
+    """多轮对话修改行程"""
+    if deepseek_client is None:
+        raise HTTPException(status_code=503, detail={"error": "AI服务未配置，无法修改行程"})
+
+    prev = request.previous_itinerary
+    message = request.message.strip()
+    if not message:
+        raise HTTPException(status_code=400, detail={"error": "修改请求不能为空"})
+
+    prompt = f"""你是一个专业的旅行规划助手。用户对之前生成的行程不满意，要求修改。
+
+原始行程：
+{json.dumps(prev, ensure_ascii=False, indent=2)}
+
+用户的修改要求：{message}
+
+请根据用户要求修改行程，保持相同的 JSON 格式输出完整行程。只返回修改后的 JSON，不要包含任何其他文字。
+格式要求：
+{{
+  "overview": {{"destination": "...", "days": N, "budget": "...", "best_season": "...", "pace": "...", "highlights_count": N}},
+  "daily_plan": [{{"day": 1, "title": "...", "activities": [...]}}],
+  "budget_breakdown": [{{"category": "...", "amount": N}}],
+  "packing_list": ["..."]
+}}
+"""
+    try:
+        response = deepseek_client.chat.completions.create(
+            model=DEEPSEEK_MODEL,
+            messages=[
+                {"role": "system", "content": "你是一个专业的旅行规划助手，只返回 JSON 格式数据。"},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=2000,
+            temperature=0.7
+        )
+        content = response.choices[0].message.content
+        json_start = content.find('{')
+        json_end = content.rfind('}') + 1
+        if json_start != -1 and json_end > json_start:
+            result = json.loads(content[json_start:json_end])
+            result["model_info"] = {"model_used": DEEPSEEK_MODEL, "provider": "DeepSeek", "type": "chat_revision"}
+            return result
+        raise ValueError("模型返回内容不包含有效 JSON")
+    except Exception as e:
+        logger.error(f"Chat API失败: {e}")
+        raise HTTPException(status_code=500, detail={"error": "AI修改失败，请稍后重试", "details": str(e)})
+
 @app.get("/api/history")
 async def get_history(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
     """获取历史行程列表"""
@@ -982,6 +1087,8 @@ async def get_history(skip: int = 0, limit: int = 20, db: Session = Depends(get_
                     "destination": it.destination,
                     "days": it.days,
                     "budget": it.budget,
+                    "travel_date": it.travel_date,
+                    "travelers": it.travelers,
                     "created_at": it.created_at.isoformat() if it.created_at else None,
                 }
                 for it in itineraries

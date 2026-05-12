@@ -25,6 +25,8 @@ class Itinerary(Base):
     destination = Column(String(255), nullable=False)
     days = Column(Integer, nullable=False)
     budget = Column(String(50), nullable=False)
+    travel_date = Column(String(50), nullable=True)
+    travelers = Column(Integer, nullable=True)
     overview = Column(Text, nullable=False)  # JSON格式存储
     daily_plan = Column(Text, nullable=False)  # JSON格式存储
     budget_breakdown = Column(Text, nullable=False)  # JSON格式存储

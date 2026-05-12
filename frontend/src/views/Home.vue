@@ -53,7 +53,7 @@
         <h1 class="hero-title serif">
           远航<span class="gradient-text">AI</span>
         </h1>
-        <p class="hero-subtitle gradient-text">让每一次思考都更有方向...</p>
+        <p class="hero-subtitle gradient-text">让每一次思考都更有方向 · 3秒生成个性化旅行行程 · AI智能规划</p>
 
         <div class="search-card glass-card">
           <div class="search-fields">
@@ -92,7 +92,42 @@
               </div>
               <div v-if="errors.budget" class="error-message">{{ errors.budget }}</div>
             </div>
+            <div class="field-divider"></div>
+            <div class="field-group">
+              <label class="field-label">出发日期</label>
+              <div class="field-input-wrapper">
+                <svg class="field-icon text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input v-model="form.date" type="date" class="field-input" placeholder="哪天出发？">
+              </div>
+            </div>
+            <div class="field-divider"></div>
+            <div class="field-group">
+              <label class="field-label">人数</label>
+              <div class="field-input-wrapper">
+                <svg class="field-icon text-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                <input v-model.number="form.travelers" type="number" min="1" max="50" class="field-input" placeholder="几人同行？">
+              </div>
+            </div>
           </div>
+
+          <!-- Preference tags -->
+          <div class="pref-section">
+            <span class="pref-label">旅行偏好（可多选）</span>
+            <div class="pref-chips">
+              <button
+                v-for="p in prefOptions"
+                :key="p.key"
+                class="pref-chip"
+                :class="{ active: selectedPrefs.includes(p.key) }"
+                type="button"
+                @click="togglePref(p.key)"
+              >
+                <span class="pref-chip-icon">{{ p.icon }}</span>
+                {{ p.label }}
+              </button>
+            </div>
+          </div>
+
           <button class="search-btn" @click="startPlanning" :disabled="loading">
             <span v-if="!loading">帮我规划</span>
             <span v-else>规划中...</span>
@@ -372,6 +407,134 @@
       </div>
     </section>
 
+    <!-- 历史行程 -->
+    <section class="history-section">
+      <div class="history-inner">
+        <div class="section-head">
+          <h2 class="section-title serif">我的历史行程</h2>
+          <span class="history-count" v-if="historyTotal">{{ historyTotal }} 条记录</span>
+        </div>
+
+        <div v-if="historyLoading" class="history-loading">加载中...</div>
+
+        <div v-else-if="historyItems.length" class="history-scroll">
+          <div
+            v-for="item in historyItems"
+            :key="item.id"
+            class="history-card card-hover"
+            @click="openHistoryDetail(item.id)"
+          >
+            <div class="h-card-top">
+              <div class="h-dest">{{ item.destination }}</div>
+              <div class="h-date">{{ formatDate(item.created_at) }}</div>
+            </div>
+            <div class="h-card-body">
+              <div class="h-stat">
+                <span class="h-label">出发</span>
+                <span class="h-val">{{ item.start_location }}</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-label">天数</span>
+                <span class="h-val">{{ item.days }}天</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-label">预算</span>
+                <span class="h-val">{{ item.budget }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="history-empty">还没有行程记录，去首页生成一个吧。</div>
+      </div>
+
+      <!-- 历史详情弹窗 -->
+      <transition name="fade">
+        <div
+          v-if="historyDetailOpen"
+          class="history-detail-backdrop"
+          @click.self="historyDetailOpen = false"
+        >
+          <div class="history-detail">
+            <div class="hd-head">
+              <h3 class="hd-title">行程详情</h3>
+              <button class="hd-close" @click="historyDetailOpen = false">✕</button>
+            </div>
+            <div v-if="historyDetailLoading" class="hd-loading">加载中...</div>
+            <div v-else-if="historyDetail" class="hd-body">
+              <div class="hd-kpis">
+                <div class="hd-kpi">
+                  <span class="hd-kpi-label">目的地</span>
+                  <span class="hd-kpi-val">{{ historyDetail.destination }}</span>
+                </div>
+                <div class="hd-kpi">
+                  <span class="hd-kpi-label">出发地</span>
+                  <span class="hd-kpi-val">{{ historyDetail.start_location }}</span>
+                </div>
+                <div class="hd-kpi">
+                  <span class="hd-kpi-label">天数</span>
+                  <span class="hd-kpi-val">{{ historyDetail.days }} 天</span>
+                </div>
+                <div class="hd-kpi">
+                  <span class="hd-kpi-label">预算</span>
+                  <span class="hd-kpi-val">{{ historyDetail.budget }}</span>
+                </div>
+              </div>
+
+              <div class="hd-block" v-if="historyDetail.overview && Object.keys(historyDetail.overview).length">
+                <div class="hd-block-title">概览</div>
+                <div class="hd-overview-grid">
+                  <div class="hd-ov-item" v-if="historyDetail.overview.best_season">
+                    <span class="hd-ov-label">最佳季节</span>
+                    <span class="hd-ov-val">{{ historyDetail.overview.best_season }}</span>
+                  </div>
+                  <div class="hd-ov-item" v-if="historyDetail.overview.pace">
+                    <span class="hd-ov-label">游玩节奏</span>
+                    <span class="hd-ov-val">{{ historyDetail.overview.pace }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hd-block" v-if="historyDetail.daily_plan && historyDetail.daily_plan.length">
+                <div class="hd-block-title">每日安排</div>
+                <div class="hd-days">
+                  <div v-for="d in historyDetail.daily_plan" :key="d.day" class="hd-day">
+                    <div class="hd-day-head">
+                      <span class="hd-day-badge">Day {{ d.day }}</span>
+                      <span class="hd-day-name">{{ d.title }}</span>
+                    </div>
+                    <div class="hd-acts" v-if="d.activities && d.activities.length">
+                      <div v-for="(a, ai) in d.activities" :key="ai" class="hd-act">
+                        <span class="hd-act-time">{{ a.time }}</span>
+                        <span class="hd-act-title">{{ a.title }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hd-block" v-if="historyDetail.budget_breakdown && historyDetail.budget_breakdown.length">
+                <div class="hd-block-title">预算拆分</div>
+                <div class="hd-budget">
+                  <div v-for="b in historyDetail.budget_breakdown" :key="b.category" class="hd-budget-row">
+                    <span>{{ b.category }}</span>
+                    <span class="hd-budget-amt">¥{{ b.amount }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hd-block" v-if="historyDetail.packing_list && historyDetail.packing_list.length">
+                <div class="hd-block-title">行前清单</div>
+                <div class="hd-pack">
+                  <span v-for="p in historyDetail.packing_list" :key="p" class="hd-pack-item">{{ p }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </section>
+
     <!-- 底部 -->
     <footer class="footer">
       <div class="footer-content">
@@ -408,6 +571,20 @@
             <router-link to="/about" class="footer-link">隐私政策</router-link>
             <router-link to="/about" class="footer-link">服务条款</router-link>
           </div>
+        </div>
+      </div>
+      <div class="footer-trust">
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0" stroke-linecap="round"/></svg>
+          <span>基于先进大模型</span>
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke-linecap="round"/></svg>
+          <span>数据安全保障</span>
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>
+          <span>秒级智能响应</span>
         </div>
       </div>
       <div class="footer-bottom">
@@ -553,13 +730,24 @@ export default {
   name: 'Home',
   data() {
     return {
-      form: { start: '南京', dest: '北京', days: 5, budget: '5000' },
+      form: { start: '南京', dest: '北京', days: 5, budget: '5000', date: '', travelers: 1 },
       loading: false,
       loadingProgress: 0,
       isDark: false,
       menuOpen: false,
       errors: { start: '', dest: '', days: '', budget: '' },
       aiPrompt: '',
+      selectedPrefs: [],
+      prefOptions: [
+        { key: '美食', icon: '🍜', label: '美食' },
+        { key: '拍照', icon: '📸', label: '拍照' },
+        { key: '亲子', icon: '👨‍👩‍👧', label: '亲子' },
+        { key: '户外', icon: '🏔️', label: '户外' },
+        { key: '文化', icon: '🏛️', label: '文化' },
+        { key: '购物', icon: '🛍️', label: '购物' },
+        { key: '放松', icon: '🧘', label: '放松' },
+        { key: '冒险', icon: '🧗', label: '冒险' },
+      ],
       quickExamples: [
         {
           id: 'tokyo-5d',
@@ -610,7 +798,15 @@ export default {
       demoItinerary: null,
       plannerOpen: false,
       plannerItinerary: null,
-      plannerError: ''
+      plannerError: '',
+
+      // history
+      historyItems: [],
+      historyTotal: 0,
+      historyLoading: false,
+      historyDetail: null,
+      historyDetailOpen: false,
+      historyDetailLoading: false
     }
   },
   mounted() {
@@ -618,6 +814,7 @@ export default {
     this.isDark = savedTheme ? savedTheme === 'dark' : false
     this.applyTheme()
     this.loadDemo()
+    this.loadHistory()
   },
   methods: {
     toggleTheme() {
@@ -640,6 +837,11 @@ export default {
       if (!this.form.budget || !this.form.budget.trim()) { this.errors.budget = '请输入预算'; isValid = false }
       else if (!/^\d+(-\d+)?(\+)?$/.test(this.form.budget.replace(/,/g, ''))) { this.errors.budget = '格式如: 5000-8000'; isValid = false }
       return isValid
+    },
+    togglePref(key) {
+      const idx = this.selectedPrefs.indexOf(key)
+      if (idx >= 0) this.selectedPrefs.splice(idx, 1)
+      else this.selectedPrefs.push(key)
     },
     applyExample(ex) {
       if (!ex) return
@@ -708,7 +910,10 @@ export default {
           start: payload.start,
           dest: payload.dest,
           days: parseInt(payload.days),
-          budget: String(payload.budget)
+          budget: String(payload.budget),
+          date: payload.date || '',
+          travelers: parseInt(payload.travelers) || 1,
+          preferences: this.selectedPrefs
         })
         this.plannerItinerary = res.data
       } catch (e) {
@@ -736,6 +941,37 @@ export default {
       } finally {
         this.demoLoading = false
       }
+    },
+    async loadHistory() {
+      try {
+        this.historyLoading = true
+        const res = await axios.get('/api/history', { params: { limit: 12 } })
+        this.historyItems = res.data.items || []
+        this.historyTotal = res.data.total || 0
+      } catch (e) {
+        console.error('加载历史行程失败:', e)
+      } finally {
+        this.historyLoading = false
+      }
+    },
+    async openHistoryDetail(id) {
+      try {
+        this.historyDetailOpen = true
+        this.historyDetailLoading = true
+        this.historyDetail = null
+        const res = await axios.get(`/api/itinerary/${id}`)
+        this.historyDetail = res.data
+      } catch (e) {
+        console.error('加载行程详情失败:', e)
+      } finally {
+        this.historyDetailLoading = false
+      }
+    },
+    formatDate(iso) {
+      if (!iso) return ''
+      const d = new Date(iso)
+      const pad = (n) => String(n).padStart(2, '0')
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
     },
     startPlanning() {
       if (!this.validateForm()) return
@@ -927,6 +1163,15 @@ html.dark-mode .gradient-text { background: linear-gradient(135deg, #6ee7b7, #60
 }
 html.dark-mode .hero-subtitle { color: rgba(255, 255, 255, 0.90); text-shadow: 0 4px 18px rgba(0,0,0,0.75); }
 
+.hero-value-prop {
+  font-size: 0.95rem;
+  color: rgba(148, 163, 184, 0.82);
+  margin-top: -1.5rem;
+  margin-bottom: 3rem;
+  letter-spacing: 0.06em;
+}
+html.dark-mode .hero-value-prop { color: rgba(148, 163, 184, 0.75); }
+
 @keyframes heroFloat {
   0% { transform: translate3d(-1.5%, -1%, 0) scale(1.04); }
   50% { transform: translate3d(1.5%, 1%, 0) scale(1.08); }
@@ -1029,6 +1274,32 @@ html.dark-mode .text-emerald { color: #6ee7b7; } html.dark-mode .text-blue { col
   text-overflow: ellipsis;
 }
 /* keep same in dark-mode (already dark glass) */
+
+.pref-section {
+  margin-bottom: 1rem; text-align: center;
+}
+.pref-label {
+  display: block; font-size: 0.8rem; color: rgba(148, 163, 184, 0.65);
+  margin-bottom: 0.5rem; letter-spacing: 0.05em;
+}
+.pref-chips {
+  display: flex; flex-wrap: wrap; gap: 0.45rem; justify-content: center;
+}
+.pref-chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.35rem 0.75rem; border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(2, 6, 23, 0.24);
+  color: rgba(203, 213, 225, 0.8); font-size: 0.82rem;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.pref-chip:hover { border-color: rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
+.pref-chip.active {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff; border-color: transparent;
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.35);
+}
+.pref-chip-icon { font-size: 0.85rem; }
 
 /* AI entry */
 .ai-entry {
@@ -1497,6 +1768,292 @@ html.dark-mode .pack-item { background: rgba(99,102,241,0.14); border: 1px solid
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
+/* 历史行程 */
+.history-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 5rem;
+}
+.history-inner {
+  border-radius: 2rem;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(22px) saturate(1.15);
+  box-shadow: 0 26px 85px rgba(2, 6, 23, 0.10);
+}
+html.dark-mode .history-inner {
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+}
+.history-count {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+.history-loading, .history-empty {
+  margin-top: 1.2rem;
+  color: var(--text-secondary);
+}
+.history-scroll {
+  margin-top: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.history-card {
+  padding: 1.15rem 1.1rem;
+  border-radius: 1.35rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 14px 45px rgba(2, 6, 23, 0.08);
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.history-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 22px 70px rgba(2, 6, 23, 0.14);
+}
+html.dark-mode .history-card {
+  background: rgba(2, 6, 23, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.42);
+}
+.h-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.7rem;
+}
+.h-dest {
+  font-size: 1.25rem;
+  font-weight: 850;
+  color: var(--text-primary);
+}
+.h-date {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.h-card-body {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.h-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.h-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  font-weight: 750;
+}
+.h-val {
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* History detail modal */
+.history-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.history-detail {
+  width: min(640px, 94vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 1.8rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(18px) saturate(1.1);
+  box-shadow: 0 28px 90px rgba(2, 6, 23, 0.25);
+}
+html.dark-mode .history-detail {
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.hd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.20);
+}
+.hd-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 850;
+  color: var(--text-primary);
+}
+.hd-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+.hd-loading {
+  padding: 2rem 1.4rem;
+  color: var(--text-secondary);
+}
+.hd-body {
+  padding: 1.2rem 1.4rem 1.6rem;
+}
+.hd-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.7rem;
+  margin-bottom: 1.2rem;
+}
+.hd-kpi {
+  border-radius: 1rem;
+  padding: 0.7rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.16);
+  text-align: center;
+}
+.hd-kpi-label {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  font-weight: 750;
+  margin-bottom: 0.2rem;
+}
+.hd-kpi-val {
+  font-weight: 900;
+  color: var(--text-primary);
+}
+.hd-block {
+  margin-bottom: 1.1rem;
+}
+.hd-block-title {
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 0.55rem;
+}
+.hd-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.hd-ov-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.8rem;
+  background: rgba(148, 163, 184, 0.10);
+}
+.hd-ov-label {
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+.hd-ov-val {
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.hd-days {
+  display: grid;
+  gap: 0.55rem;
+}
+.hd-day {
+  padding: 0.65rem 0.7rem;
+  border-radius: 1.1rem;
+  background: rgba(148, 163, 184, 0.10);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+.hd-day-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+.hd-day-badge {
+  font-size: 0.78rem;
+  font-weight: 950;
+  color: rgba(59, 130, 246, 0.95);
+  background: rgba(59, 130, 246, 0.10);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+}
+.hd-day-name {
+  font-weight: 900;
+  color: var(--text-primary);
+}
+.hd-acts {
+  display: grid;
+  gap: 0.35rem;
+}
+.hd-act {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.65rem;
+  background: rgba(148, 163, 184, 0.06);
+}
+.hd-act-time {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.hd-act-title {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+.hd-budget {
+  display: grid;
+  gap: 0.45rem;
+}
+.hd-budget-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+.hd-budget-amt {
+  font-weight: 900;
+}
+.hd-pack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.hd-pack-item {
+  font-size: 0.82rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.10);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  color: rgba(99, 102, 241, 0.95);
+}
+html.dark-mode .hd-pack-item {
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  color: rgba(199, 210, 254, 0.92);
+}
+
+@media (max-width: 768px) {
+  .history-section { padding: 0 1rem 4rem; }
+  .history-inner { padding: 1.5rem; }
+  .history-scroll { grid-template-columns: 1fr; }
+  .hd-kpis { grid-template-columns: repeat(2, 1fr); }
+  .hd-overview-grid { grid-template-columns: 1fr; }
+}
+
 /* 底部 */
 .footer { background: var(--bg-secondary); padding: 4rem 2rem 2rem; border-top: 1px solid var(--border-color); }
 .footer-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 3fr; gap: 4rem; align-items: start; }
@@ -1508,7 +2065,17 @@ html.dark-mode .pack-item { background: rgba(99,102,241,0.14); border: 1px solid
 .link-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
 .footer-link { color: var(--text-secondary); text-decoration: none; font-size: 0.95rem; transition: all 0.3s; display: block; }
 .footer-link:hover { color: var(--primary-color); transform: translateX(4px); }
-.footer-bottom { max-width: 1200px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid var(--border-color); text-align: center; }
+.footer-trust {
+  max-width: 1200px; margin: 2.5rem auto 0;
+  display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  color: var(--text-secondary); font-size: 0.85rem;
+}
+.trust-item svg { width: 18px; height: 18px; opacity: 0.55; }
+
+.footer-bottom { max-width: 1200px; margin: 1.5rem auto 0; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center; }
 .copyright { color: var(--text-secondary); font-size: 0.9rem; }
 
 @media (max-width: 768px) {
