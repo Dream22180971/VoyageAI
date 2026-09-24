@@ -15,7 +15,7 @@
 
 ---
 
-## What it does
+## 🎯 What it does
 
 VoyageAI turns a few trip constraints into a usable plan:
 
@@ -28,7 +28,7 @@ VoyageAI turns a few trip constraints into a usable plan:
 
 ---
 
-## Demo
+## 🎬 Demo
 
 <div align="center">
 
@@ -42,7 +42,7 @@ VoyageAI turns a few trip constraints into a usable plan:
 
 ---
 
-## Quick Start
+## ⚡ Quick Start
 
 ### Backend
 
@@ -72,7 +72,7 @@ Frontend: `http://localhost:5173`
 
 ---
 
-## Product Flow
+## 🧭 Product Flow
 
 ```mermaid
 flowchart LR
@@ -89,7 +89,7 @@ flowchart LR
 
 ---
 
-## Core Features
+## ✨ Core Features
 
 | Feature | Description |
 |---|---|
@@ -103,7 +103,7 @@ flowchart LR
 
 ---
 
-## Architecture
+## 🧩 Architecture
 
 ```text
 Frontend
@@ -120,7 +120,7 @@ FastAPI · HTTPX · OpenAI-compatible client
 
 ---
 
-## Current Limitations
+## ⚠️ Current Limitations
 
 - itinerary quality depends on model output and prompt quality
 - external weather / map capabilities depend on configured APIs
@@ -129,7 +129,7 @@ FastAPI · HTTPX · OpenAI-compatible client
 
 ---
 
-## Roadmap
+## 🗺 Roadmap
 
 - [x] itinerary generation
 - [x] weather integration
@@ -143,7 +143,7 @@ FastAPI · HTTPX · OpenAI-compatible client
 
 ---
 
-## License
+## 📄 License
 
 [MIT](./LICENSE)
 
