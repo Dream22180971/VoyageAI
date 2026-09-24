@@ -1,0 +1,23 @@
+name: README Quality
+
+on:
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'README.zh-CN.md'
+      - 'package.json'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'Dockerfile*'
+      - 'docker-compose*.yml'
+      - 'docker-compose*.yaml'
+      - '.github/workflows/readme-quality.yml'
+  push:
+    paths:
+      - 'README.md'
+      - 'README.zh-CN.md'
+  workflow_dispatch:
+
+jobs:
+  readme-quality:
+    uses: Dream22180971/dream22180971/.github/workflows/readme-quality.yml@main
