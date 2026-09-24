@@ -9,6 +9,42 @@ Plan a complete trip from destination, days and budget with AI. / 输入目的�
 
 ## Demo / 演示
 
+[Live Demo / 在线体验](https://voyageai.seanwalter.top/) · Existing screenshots are kept below. / 现有截图保留在下方。
+
+## Quick Start / 5 分钟快速开始
+
+```bash
+git clone https://github.com/Dream22180971/VoyageAI.git
+cd VoyageAI
+pip install -r requirements.txt
+python main.py
+# open another terminal for the frontend
+npm install
+npm run dev
+```
+
+> **EN:** Clone, install, run. Advanced configuration and project-specific details are documented below.  
+> **中文：** 克隆、安装、运行即可开始。高级配置和项目特定说明继续保留在下方。
+
+## Why this project / 为什么做这个项目
+
+**EN:** This project starts from one concrete problem and prioritizes being understandable, runnable and useful before becoming complex.
+
+**中文：** 这个项目从一个明确问题出发，优先做到易理解、能运行、真正有用，再逐步增加复杂能力。
+
+---
+
+Plan a complete trip from destination, days and budget with AI. / 输入目的地、天数和预算，让 AI 生成完整旅行攻略。
+
+<!-- README-V2-BILINGUAL -->
+
+# VoyageAI
+
+> **EN:** Plan a complete trip from destination, days and budget with AI.  
+> **中文：** 输入目的地、天数和预算，让 AI 生成完整旅行攻略。
+
+## Demo / 演示
+
 [Live Demo / 在线体验](https://voyageai.seanwalter.top/) · Existing screenshots are kept below / 现有截图保留在下方。
 
 ## Quick Start / 5 分钟快速开始
