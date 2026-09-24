@@ -15,7 +15,7 @@
 
 ---
 
-## 它能做什么
+## 🎯 它能做什么
 
 VoyageAI 把旅行前最耗时间的几件事合到一个流程里：
 
@@ -28,7 +28,7 @@ VoyageAI 把旅行前最耗时间的几件事合到一个流程里：
 
 ---
 
-## 演示
+## 🎬 演示
 
 <div align="center">
 
@@ -42,7 +42,7 @@ VoyageAI 把旅行前最耗时间的几件事合到一个流程里：
 
 ---
 
-## 5 分钟快速开始
+## ⚡ 5 分钟快速开始
 
 ### 后端
 
@@ -72,7 +72,7 @@ npm run dev
 
 ---
 
-## 产品流程
+## 🧭 产品流程
 
 ```mermaid
 flowchart LR
@@ -89,7 +89,7 @@ flowchart LR
 
 ---
 
-## 核心功能
+## ✨ 核心功能
 
 | 功能 | 说明 |
 |---|---|
@@ -103,7 +103,7 @@ flowchart LR
 
 ---
 
-## 技术架构
+## 🧩 技术架构
 
 ```text
 Frontend
@@ -120,7 +120,7 @@ FastAPI · HTTPX · OpenAI-compatible client
 
 ---
 
-## 当前限制
+## ⚠️ 当前限制
 
 - 行程质量受模型和 Prompt 影响
 - 天气 / 地图能力依赖外部 API
@@ -129,7 +129,7 @@ FastAPI · HTTPX · OpenAI-compatible client
 
 ---
 
-## 路线图
+## 🗺 路线图
 
 - [x] 行程生成
 - [x] 天气能力
@@ -143,7 +143,7 @@ FastAPI · HTTPX · OpenAI-compatible client
 
 ---
 
-## License
+## 📄 License
 
 [MIT](./LICENSE)
 
