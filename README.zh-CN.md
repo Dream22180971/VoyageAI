@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.herokuapp.com?font=Space+Grotesk&weight=700&size=30&duration=2300&pause=900&color=3B82F6&center=true&vCenter=true&width=900&lines=PLAN+THE+TRIP%2C+NOT+THE+SPREADSHEET;AI+ITINERARY+%C2%B7+WEATHER+%C2%B7+BUDGET" alt="Typing SVG" />
-
 # VoyageAI
 
 **输入目的地、天数和预算，让 AI 生成一份可以直接使用的旅行计划。**
