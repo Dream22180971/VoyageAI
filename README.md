@@ -1,3 +1,40 @@
+Plan a complete trip from destination, days and budget with AI. / 输入目的地、天数和预算，让 AI 生成完整旅行攻略。
+
+<!-- README-V2-BILINGUAL -->
+
+# VoyageAI
+
+> **EN:** Plan a complete trip from destination, days and budget with AI.  
+> **中文：** 输入目的地、天数和预算，让 AI 生成完整旅行攻略。
+
+## Demo / 演示
+
+[Live Demo / 在线体验](https://voyageai.seanwalter.top/) · Existing screenshots are kept below / 现有截图保留在下方。
+
+## Quick Start / 5 分钟快速开始
+
+```bash
+git clone https://github.com/Dream22180971/VoyageAI.git
+cd VoyageAI
+pip install -r requirements.txt
+python main.py
+# open another terminal for the frontend
+npm install
+npm run dev
+```
+
+> **EN:** The commands above are intentionally kept short: clone, install, run. Project-specific configuration and advanced usage stay in the detailed documentation below.  
+> **中文：** 上面的命令刻意保持最短路径：克隆、安装、运行。项目特定配置与高级用法继续保留在下方详细文档中。
+
+## Why this project / 为什么做这个项目
+
+**EN:** This repository is built around one concrete problem and aims to be understandable, runnable and useful before becoming complex.
+
+**中文：** 这个仓库围绕一个明确问题构建，优先做到易理解、能运行、真正有用，再逐步增加复杂能力。
+
+---
+
+<!-- ORIGINAL-DOCS -->
 # VoyageAI - 智能旅行规划
 
 > 告诉 AI 你想去哪、玩几天、预算多少——它帮你生成一份完整的旅行攻略。
