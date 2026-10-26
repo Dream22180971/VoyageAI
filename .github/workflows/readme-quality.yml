@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'README.md'
+      - 'README.en.md'
       - 'README.zh-CN.md'
       - 'package.json'
       - 'requirements.txt'
@@ -15,6 +16,7 @@ on:
   push:
     paths:
       - 'README.md'
+      - 'README.en.md'
       - 'README.zh-CN.md'
   workflow_dispatch:
 
